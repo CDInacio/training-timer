@@ -29,6 +29,7 @@
     color: var(--text);
     min-height: 100vh;
     overflow-x: hidden;
+    padding-top: 74px;
   }
 
   /* ── SHARED ──────────────────────────────────────────── */
@@ -82,6 +83,66 @@
   .top-bar-brand span { color: var(--work); }
   .top-bar-nav { display: flex; gap: .5rem; }
 
+  /* ── APP MENU ───────────────────────────────────────── */
+  .app-menu {
+    position: fixed;
+    left: 50%;
+    top: 12px;
+    transform: translateX(-50%);
+    width: min(760px, calc(100vw - 20px));
+    background: rgba(18,18,26,.92);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 14px;
+    padding: .45rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: .35rem;
+    backdrop-filter: blur(10px);
+    z-index: 60;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .app-menu.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) translateY(-14px);
+  }
+  .app-menu-btn {
+    border: 1px solid transparent;
+    background: transparent;
+    color: var(--muted);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: .75rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    border-radius: 10px;
+    padding: .62rem .4rem;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .app-menu-btn:hover {
+    color: var(--text);
+    border-color: rgba(255,255,255,.14);
+  }
+  .app-menu-btn.is-active {
+    color: #fff;
+    background: rgba(255,77,28,.2);
+    border-color: rgba(255,77,28,.35);
+  }
+  .app-menu-btn:disabled {
+    opacity: .4;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 640px) {
+    body { padding-top: 80px; }
+    .app-menu-btn {
+      font-size: .66rem;
+      letter-spacing: .09em;
+      padding: .68rem .2rem;
+    }
+  }
+
   /* ── HOME SCREEN ─────────────────────────────────────── */
   #home-screen {
     position: relative;
@@ -122,7 +183,6 @@
     border-radius: 14px; padding: 1.25rem 1.5rem;
     display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   }
-  .active-banner-left {}
   .active-banner-tag {
     font-family: 'Barlow Condensed', sans-serif;
     font-size: .7rem; font-weight: 700; letter-spacing: .2em;
@@ -163,9 +223,55 @@
   .home-actions {
     display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center;
   }
+  .history-panel {
+    width: 100%; max-width: 700px;
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin-top: .5rem;
+  }
+  .history-head {
+    display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+    margin-bottom: .75rem;
+  }
+  .history-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .8rem; font-weight: 700; letter-spacing: .18em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .history-stats {
+    display: flex; gap: .35rem; flex-wrap: wrap;
+  }
+  .history-chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .65rem; letter-spacing: .09em; text-transform: uppercase;
+    color: rgba(240,238,232,.7);
+    background: rgba(255,255,255,.06);
+    border-radius: 4px;
+    padding: .18rem .5rem;
+  }
+  .history-list {
+    display: grid; gap: .5rem;
+  }
+  .history-row {
+    display: grid; grid-template-columns: 1fr auto; gap: .75rem;
+    background: var(--surface2);
+    border: 1px solid rgba(255,255,255,.05);
+    border-radius: 8px;
+    padding: .65rem .75rem;
+  }
+  .history-row-main {
+    font-size: .85rem; font-weight: 600;
+  }
+  .history-row-sub {
+    font-size: .75rem; color: var(--muted);
+  }
+  .history-empty {
+    text-align: center; color: var(--muted); font-size: .82rem; padding: .5rem;
+  }
 
   /* ── FICHAS LIST SCREEN ──────────────────────────────── */
-  #fichas-screen { }
 
   .fichas-content {
     flex: 1; padding: 1.5rem 1.75rem; max-width: 680px;
@@ -223,7 +329,6 @@
   }
 
   /* ── FICHA EDITOR SCREEN ─────────────────────────────── */
-  #editor-screen { }
 
   .editor-content {
     flex: 1; padding: 1.5rem 1.75rem; max-width: 680px;
@@ -283,6 +388,13 @@
     border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: .6rem;
     display: flex; flex-direction: column; gap: .6rem;
   }
+  .exercise-item.dragging {
+    opacity: .4;
+    border-color: rgba(255,77,28,.35);
+  }
+  .exercise-item.drag-over {
+    border-color: rgba(0,201,167,.45);
+  }
   .exercise-item-header {
     display: flex; align-items: center; justify-content: space-between; gap: .5rem;
   }
@@ -321,6 +433,25 @@
   .add-exercise-form.open { display: flex; }
   .add-exercise-form .field-row { grid-template-columns: 1fr 1fr; }
   .form-actions { display: flex; gap: .5rem; justify-content: flex-end; }
+  .editor-feedback {
+    margin-top: .75rem;
+    padding: .6rem .75rem;
+    border-radius: 8px;
+    font-size: .82rem;
+    display: none;
+  }
+  .editor-feedback.error {
+    display: block;
+    color: #ffd5c8;
+    background: rgba(255,77,28,.12);
+    border: 1px solid rgba(255,77,28,.25);
+  }
+  .editor-feedback.success {
+    display: block;
+    color: #b6f2e7;
+    background: rgba(0,201,167,.12);
+    border: 1px solid rgba(0,201,167,.28);
+  }
   .btn-sm {
     font-family: 'Bebas Neue', sans-serif; letter-spacing: .1em;
     border: none; cursor: pointer; transition: all .15s;
@@ -379,6 +510,27 @@
     font-family: 'Barlow Condensed', sans-serif;
     font-size: .8rem; font-weight: 600; letter-spacing: .2em;
     color: var(--muted); text-transform: uppercase; margin-bottom: .75rem;
+  }
+  .setup-settings {
+    background: var(--surface2);
+    border-radius: 10px;
+    padding: .85rem;
+    margin-bottom: 1.25rem;
+    display: grid;
+    gap: .6rem;
+  }
+  .setup-setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    font-size: .82rem;
+  }
+  .setup-setting-row label {
+    color: rgba(240,238,232,.8);
+  }
+  .setup-range {
+    width: 120px;
   }
   .series-control {
     display: flex; align-items: center; gap: 1.5rem; margin-bottom: .75rem;
@@ -625,9 +777,7 @@
 <div id="home-screen" class="screen active">
   <div class="top-bar">
     <div class="top-bar-brand">Treino <span>App</span></div>
-    <div class="top-bar-nav">
-      <button class="btn-ghost" onclick="showScreen('fichas-screen')">📋 Fichas</button>
-    </div>
+    <div></div>
   </div>
   <div class="home-content">
     <div class="home-title">Seu <span>Treino</span><br>de Hoje</div>
@@ -635,18 +785,16 @@
 
     <div id="active-banner-wrap" style="width:100%;max-width:520px;"></div>
 
-    <div class="home-actions">
-      <button class="btn btn-secondary" onclick="showScreen('fichas-screen')">📋 Gerenciar Fichas</button>
-    </div>
+    <div id="history-panel" class="history-panel"></div>
   </div>
 </div>
 
 <!-- ══ FICHAS LIST SCREEN ══════════════════════════════════ -->
 <div id="fichas-screen" class="screen">
   <div class="top-bar">
-    <button class="btn-ghost" onclick="showScreen('home-screen')">← Voltar</button>
+    <div></div>
     <div class="top-bar-brand">Fichas de <span>Treino</span></div>
-    <button class="btn-ghost" onclick="openNewFicha()">+ Nova</button>
+    <div></div>
   </div>
   <div class="fichas-content">
     <div class="fichas-header">
@@ -672,17 +820,6 @@
       <input class="field-input" id="editor-name" type="text" placeholder="Ex: Treino A – Full Body, Push Day...">
     </div>
 
-    <div class="field-row">
-      <div>
-        <div class="field-label">Tempo de Trabalho (s)</div>
-        <input class="field-input" id="editor-work-time" type="number" min="5" max="300" value="45">
-      </div>
-      <div>
-        <div class="field-label">Tempo de Descanso (s)</div>
-        <input class="field-input" id="editor-rest-time" type="number" min="5" max="300" value="20">
-      </div>
-    </div>
-
     <div class="exercises-section">
       <div class="exercises-section-header">
         <div class="exercises-section-title">Exercícios (<span id="ex-count">0</span>)</div>
@@ -690,6 +827,13 @@
       </div>
 
       <div id="add-exercise-form" class="add-exercise-form">
+        <div>
+          <div class="field-label">Biblioteca de Exercícios</div>
+          <div class="field-row" style="grid-template-columns:1fr auto;">
+            <select class="field-select" id="library-ex-select"></select>
+            <button class="btn-sm btn-sm-ghost" onclick="applyLibraryExercise()" type="button">Usar</button>
+          </div>
+        </div>
         <div>
           <div class="field-label">Nome do Exercício</div>
           <input class="field-input" id="new-ex-name" type="text" placeholder="Ex: Goblet Squat">
@@ -699,6 +843,13 @@
           <input class="field-input" id="new-ex-name-pt" type="text" placeholder="Ex: Agachamento Goblet">
         </div>
         <div class="field-row">
+          <div>
+            <div class="field-label">Modo do Exercício</div>
+            <select class="field-select" id="new-ex-mode" onchange="handleModeChange()">
+              <option value="tempo" selected>Por Tempo</option>
+              <option value="serie">Por Série</option>
+            </select>
+          </div>
           <div>
             <div class="field-label">Nível</div>
             <select class="field-select" id="new-ex-level">
@@ -712,15 +863,37 @@
             <input class="field-input" id="new-ex-muscles" type="text" placeholder="Ex: Core, Glúteos">
           </div>
         </div>
+        <div class="field-row" id="mode-time-fields">
+          <div>
+            <div class="field-label">Tempo de Trabalho (s)</div>
+            <input class="field-input" id="new-ex-work-time" type="number" min="5" max="300" value="45">
+          </div>
+          <div>
+            <div class="field-label">Descanso (s)</div>
+            <input class="field-input" id="new-ex-rest-time" type="number" min="0" max="300" value="20">
+          </div>
+        </div>
+        <div class="field-row" id="mode-series-fields" style="display:none;">
+          <div>
+            <div class="field-label">Quantidade de Séries</div>
+            <input class="field-input" id="new-ex-sets" type="number" min="1" max="20" value="3">
+          </div>
+          <div>
+            <div class="field-label">Descanso entre Séries (s)</div>
+            <input class="field-input" id="new-ex-series-rest" type="number" min="0" max="300" value="30">
+          </div>
+        </div>
         <div>
           <div class="field-label">Dica de Execução (opcional)</div>
           <input class="field-input" id="new-ex-tip" type="text" placeholder="Ex: Joelhos para fora, peito erguido">
         </div>
         <div class="form-actions">
           <button class="btn-sm btn-sm-ghost" onclick="toggleAddForm()">Cancelar</button>
-          <button class="btn-sm btn-sm-primary" onclick="addExerciseToEditor()">Adicionar</button>
+          <button class="btn-sm btn-sm-primary" id="add-ex-submit-btn" onclick="addExerciseToEditor()">Adicionar</button>
         </div>
       </div>
+
+      <div id="editor-feedback" class="editor-feedback"></div>
 
       <div id="editor-exercises-list" style="margin-top:.5rem;"></div>
       <div id="no-exercises-msg" style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.85rem;">
@@ -729,7 +902,6 @@
     </div>
   </div>
   <div class="editor-footer">
-    <button class="btn btn-secondary" onclick="showScreen('fichas-screen')">Cancelar</button>
     <button class="btn btn-primary" onclick="saveFicha()">💾 Salvar Ficha</button>
   </div>
 </div>
@@ -737,21 +909,30 @@
 <!-- ══ SETUP SCREEN ════════════════════════════════════════ -->
 <div id="setup-screen" class="screen">
   <div class="top-bar">
-    <button class="btn-ghost" onclick="showScreen('home-screen')">← Voltar</button>
+    <div></div>
     <div class="top-bar-brand" id="setup-brand">KB <span>Full Body</span></div>
     <div></div>
   </div>
   <div class="setup-content">
     <div class="setup-card">
       <div class="setup-card-title" id="setup-ficha-name">Treino</div>
-      <div class="setup-card-sub" id="setup-ficha-sub">45s trabalho / 20s descanso</div>
-      <div class="setup-label">Número de Séries</div>
-      <div class="series-control">
-        <button class="series-btn" onclick="changeSeries(-1)">−</button>
-        <div class="series-display" id="series-val">2</div>
-        <button class="series-btn" onclick="changeSeries(+1)">+</button>
+      <div class="setup-card-sub" id="setup-ficha-sub">Modos por exercício</div>
+      <div class="series-hint" id="series-hint" style="margin-bottom:1.25rem;">0 exercícios · ~0 min</div>
+      <div class="setup-label">Ajustes de Sessão</div>
+      <div class="setup-settings">
+        <div class="setup-setting-row">
+          <label><input type="checkbox" id="set-sound" checked> Som ativo</label>
+          <input type="range" id="set-volume" class="setup-range" min="0" max="100" value="80">
+        </div>
+        <div class="setup-setting-row">
+          <label><input type="checkbox" id="set-countdown" checked> Bip regressivo (3,2,1)</label>
+          <span style="font-size:.75rem;color:var(--muted);">cronômetro</span>
+        </div>
+        <div class="setup-setting-row">
+          <label><input type="checkbox" id="set-vibration" checked> Vibração (mobile)</label>
+          <span style="font-size:.75rem;color:var(--muted);">fase</span>
+        </div>
       </div>
-      <div class="series-hint" id="series-hint">2 séries · ~20 min</div>
       <div class="exercise-preview">
         <div class="preview-header">Exercícios</div>
         <ul class="preview-list" id="setup-preview-list"></ul>
@@ -765,7 +946,7 @@
 <div id="timer-screen" class="screen">
   <div class="top-bar">
     <div class="top-bar-brand" id="timer-brand">KB <span>Full Body</span></div>
-    <div class="series-badge">Série <strong id="cur-series">1</strong>/<span id="tot-series">2</span></div>
+    <div class="series-badge"><span id="series-badge-label">Bloco</span> <strong id="cur-series">1</strong>/<span id="tot-series">1</span></div>
     <button class="btn-ghost" onclick="exitWorkout()">✕ Sair</button>
   </div>
   <div class="main-area">
@@ -804,7 +985,7 @@
   </div>
   <div class="controls">
     <button class="ctrl-btn secondary" id="pause-btn" onclick="togglePause()">⏸ PAUSAR</button>
-    <button class="ctrl-btn secondary" onclick="skipPhase()">⏭ PULAR</button>
+    <button class="ctrl-btn secondary" id="skip-btn" onclick="skipPhase()">⏭ PULAR</button>
   </div>
 </div>
 
@@ -833,6 +1014,13 @@
   </div>
 </div>
 
+<div id="app-menu" class="app-menu">
+  <button class="app-menu-btn" data-menu-target="home-screen" onclick="menuGo('home-screen')">Início</button>
+  <button class="app-menu-btn" data-menu-target="fichas-screen" onclick="menuGo('fichas-screen')">Fichas</button>
+  <button class="app-menu-btn" data-menu-target="new-ficha" onclick="menuGo('new-ficha')">Nova</button>
+  <button class="app-menu-btn" id="menu-setup-btn" data-menu-target="setup-screen" onclick="menuGoSetup()">Treino</button>
+</div>
+
 <script>
 // ── STORAGE ────────────────────────────────────────────────
 const STORAGE_KEY = 'treino_app_v1';
@@ -840,9 +1028,18 @@ const STORAGE_KEY = 'treino_app_v1';
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      return normalizeData(parsed);
+    }
   } catch(e) {}
-  return { fichas: getDefaultFichas(), activeFichaId: null };
+  return {
+    fichas: getDefaultFichas(),
+    activeFichaId: null,
+    workoutHistory: [],
+    exerciseLibrary: getDefaultExerciseLibrary(),
+    settings: getDefaultSettings()
+  };
 }
 
 function saveData(data) {
@@ -853,21 +1050,124 @@ function getDefaultFichas() {
   return [{
     id: 'default-kb',
     name: 'KB Full Body',
-    workTime: 45,
-    restTime: 20,
     exercises: [
-      { name: "Hand-to-Hand Swing",   namePT: "Swing de Mão em Mão",          muscles: ["Core","Glúteos","Post. Coxa","Grip"], tip: "Core contraído, quadril como motor",          level: "Avançado"      },
-      { name: "Alternate Back Lunge", namePT: "Avanço Alternado para Trás",    muscles: ["Glúteos","Quadríceps","Equilíbrio"],  tip: "Joelho traseiro quase no chão",               level: "Intermediário" },
-      { name: "Strict Press R/L",     namePT: "Desenvolvimento Estrito D/E",   muscles: ["Deltoides","Tríceps","Core"],         tip: "Não arquear lombar, core ativo",              level: "Intermediário" },
-      { name: "Bent-Over Row R/L",    namePT: "Remada Curvada D/E",            muscles: ["Dorsais","Bíceps","Postura"],         tip: "Cotovelo puxando para trás, não para cima",   level: "Intermediário" },
-      { name: "Offset Push-Up R/L",   namePT: "Flexão com KB Alternado D/E",   muscles: ["Peito","Ombros","Core"],              tip: "Mão no KB, corpo alinhado",                  level: "Avançado"      },
-      { name: "Goblet Squat",         namePT: "Agachamento Goblet",            muscles: ["Quadríceps","Glúteos","Core"],        tip: "Joelhos para fora, peito erguido",            level: "Iniciante"     },
-      { name: "Single Leg RDL R/L",   namePT: "Levantamento Terra Unilateral", muscles: ["Isquiotibiais","Glúteos","Equilíbrio"],tip:"Quadril dobra, não a lombar",                level: "Intermediário" },
-      { name: "Swing Clean R/L",      namePT: "Swing com Limpeza D/E",         muscles: ["Potência","Grip","Full Body"],        tip: "Cotovelo guia o KB, não jogue",              level: "Avançado"      },
-      { name: "Goblet Curl",          namePT: "Rosca Goblet",                  muscles: ["Bíceps","Grip","Core"],               tip: "Segurar KB pelos lados, cotovelos fixos",     level: "Iniciante"     },
-      { name: "Crush Push-Ups",       namePT: "Flexão com Compressão",         muscles: ["Peito","Tríceps","Ombros"],           tip: "Apertar o KB o tempo todo para ativar",       level: "Intermediário" },
+      { name: "Hand-to-Hand Swing",   namePT: "Swing de Mão em Mão",          muscles: ["Core","Glúteos","Post. Coxa","Grip"], tip: "Core contraído, quadril como motor",          level: "Avançado", mode: "tempo", workTime: 45, restTime: 20 },
+      { name: "Alternate Back Lunge", namePT: "Avanço Alternado para Trás",    muscles: ["Glúteos","Quadríceps","Equilíbrio"],  tip: "Joelho traseiro quase no chão",               level: "Intermediário", mode: "tempo", workTime: 45, restTime: 20 },
+      { name: "Strict Press R/L",     namePT: "Desenvolvimento Estrito D/E",   muscles: ["Deltoides","Tríceps","Core"],         tip: "Não arquear lombar, core ativo",              level: "Intermediário", mode: "serie", sets: 3, seriesRest: 40 },
+      { name: "Bent-Over Row R/L",    namePT: "Remada Curvada D/E",            muscles: ["Dorsais","Bíceps","Postura"],         tip: "Cotovelo puxando para trás, não para cima",   level: "Intermediário", mode: "serie", sets: 3, seriesRest: 40 },
+      { name: "Offset Push-Up R/L",   namePT: "Flexão com KB Alternado D/E",   muscles: ["Peito","Ombros","Core"],              tip: "Mão no KB, corpo alinhado",                  level: "Avançado", mode: "tempo", workTime: 45, restTime: 20 },
+      { name: "Goblet Squat",         namePT: "Agachamento Goblet",            muscles: ["Quadríceps","Glúteos","Core"],        tip: "Joelhos para fora, peito erguido",            level: "Iniciante", mode: "serie", sets: 4, seriesRest: 50 },
+      { name: "Single Leg RDL R/L",   namePT: "Levantamento Terra Unilateral", muscles: ["Isquiotibiais","Glúteos","Equilíbrio"],tip:"Quadril dobra, não a lombar",                level: "Intermediário", mode: "tempo", workTime: 40, restTime: 20 },
+      { name: "Swing Clean R/L",      namePT: "Swing com Limpeza D/E",         muscles: ["Potência","Grip","Full Body"],        tip: "Cotovelo guia o KB, não jogue",              level: "Avançado", mode: "tempo", workTime: 45, restTime: 20 },
+      { name: "Goblet Curl",          namePT: "Rosca Goblet",                  muscles: ["Bíceps","Grip","Core"],               tip: "Segurar KB pelos lados, cotovelos fixos",     level: "Iniciante", mode: "serie", sets: 3, seriesRest: 30 },
+      { name: "Crush Push-Ups",       namePT: "Flexão com Compressão",         muscles: ["Peito","Tríceps","Ombros"],           tip: "Apertar o KB o tempo todo para ativar",       level: "Intermediário", mode: "tempo", workTime: 40, restTime: 20 },
     ]
   }];
+}
+
+function getDefaultExerciseLibrary() {
+  const map = new Map();
+  getDefaultFichas().forEach(f => {
+    f.exercises.forEach(ex => {
+      map.set(ex.name.toLowerCase(), {
+        name: ex.name,
+        namePT: ex.namePT || '',
+        level: ex.level || 'Intermediário',
+        muscles: Array.isArray(ex.muscles) ? [...ex.muscles] : [],
+        tip: ex.tip || '',
+        mode: ex.mode === 'serie' ? 'serie' : 'tempo',
+        workTime: ex.workTime,
+        restTime: ex.restTime,
+        sets: ex.sets,
+        seriesRest: ex.seriesRest
+      });
+    });
+  });
+  return Array.from(map.values());
+}
+
+function getDefaultSettings() {
+  return {
+    soundEnabled: true,
+    countdownEnabled: true,
+    vibrationEnabled: true,
+    volume: 80
+  };
+}
+
+function normalizeData(data) {
+  const settings = {
+    ...getDefaultSettings(),
+    ...(data?.settings || {})
+  };
+  const fichas = Array.isArray(data?.fichas) ? data.fichas : [];
+  const history = Array.isArray(data?.workoutHistory) ? data.workoutHistory : [];
+  const library = Array.isArray(data?.exerciseLibrary) ? data.exerciseLibrary : [];
+  const normalizedFichas = fichas.map(f => {
+    const defaultWork = Number.isFinite(f?.workTime) ? f.workTime : 45;
+    const defaultRest = Number.isFinite(f?.restTime) ? f.restTime : 20;
+    const exercises = Array.isArray(f?.exercises) ? f.exercises : [];
+    return {
+      id: f.id || ('ficha-' + Date.now()),
+      name: f.name || 'Ficha sem nome',
+      exercises: exercises.map(ex => {
+        const mode = ex?.mode === 'serie' ? 'serie' : 'tempo';
+        const normalized = {
+          name: ex?.name || 'Exercício',
+          namePT: ex?.namePT || '',
+          muscles: Array.isArray(ex?.muscles) ? ex.muscles : [],
+          tip: ex?.tip || '',
+          level: ex?.level || 'Intermediário',
+          mode
+        };
+        if (mode === 'serie') {
+          normalized.sets = Math.max(1, parseInt(ex?.sets, 10) || 3);
+          normalized.seriesRest = Math.max(0, parseInt(ex?.seriesRest, 10) || 30);
+        } else {
+          normalized.workTime = Math.max(5, parseInt(ex?.workTime, 10) || defaultWork);
+          normalized.restTime = Math.max(0, parseInt(ex?.restTime, 10) || defaultRest);
+        }
+        return normalized;
+      })
+    };
+  });
+
+  const normalizedLibrary = library.map(item => {
+    const mode = item?.mode === 'serie' ? 'serie' : 'tempo';
+    const normalized = {
+      name: item?.name || 'Exercício',
+      namePT: item?.namePT || '',
+      muscles: Array.isArray(item?.muscles) ? item.muscles : [],
+      tip: item?.tip || '',
+      level: item?.level || 'Intermediário',
+      mode
+    };
+    if (mode === 'serie') {
+      normalized.sets = Math.max(1, parseInt(item?.sets, 10) || 3);
+      normalized.seriesRest = Math.max(0, parseInt(item?.seriesRest, 10) || 30);
+    } else {
+      normalized.workTime = Math.max(5, parseInt(item?.workTime, 10) || 45);
+      normalized.restTime = Math.max(0, parseInt(item?.restTime, 10) || 20);
+    }
+    return normalized;
+  });
+
+  const autoLibrary = new Map();
+  getDefaultExerciseLibrary().forEach(ex => autoLibrary.set(ex.name.toLowerCase(), ex));
+  normalizedFichas.forEach(f => {
+    f.exercises.forEach(ex => {
+      autoLibrary.set(ex.name.toLowerCase(), { ...ex, muscles: [...(ex.muscles || [])] });
+    });
+  });
+  normalizedLibrary.forEach(ex => autoLibrary.set(ex.name.toLowerCase(), ex));
+
+  return {
+    activeFichaId: data?.activeFichaId || null,
+    fichas: normalizedFichas,
+    workoutHistory: history,
+    exerciseLibrary: Array.from(autoLibrary.values()),
+    settings
+  };
 }
 
 let appData = loadData();
@@ -876,6 +1176,119 @@ let appData = loadData();
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  updateAppMenu(id);
+}
+
+function menuGo(target) {
+  if (target === 'new-ficha') {
+    openNewFicha();
+    return;
+  }
+  showScreen(target);
+  if (target === 'home-screen') renderHome();
+  if (target === 'fichas-screen') renderFichasList();
+}
+
+function menuGoSetup() {
+  const fichaId = appData.activeFichaId || (currentFicha && currentFicha.id);
+  if (!fichaId) {
+    showScreen('fichas-screen');
+    renderFichasList();
+    return;
+  }
+  goToSetup(fichaId);
+}
+
+function updateAppMenu(screenId) {
+  const menu = document.getElementById('app-menu');
+  if (!menu) return;
+  const hide = screenId === 'timer-screen' || screenId === 'done-screen';
+  menu.classList.toggle('hidden', hide);
+
+  const setupBtn = document.getElementById('menu-setup-btn');
+  const hasFicha = !!(appData.activeFichaId || (currentFicha && currentFicha.id));
+  setupBtn.disabled = !hasFicha;
+  setupBtn.title = hasFicha ? 'Abrir treino da ficha ativa' : 'Ative uma ficha para treinar';
+
+  const activeTarget = (() => {
+    if (screenId === 'editor-screen') return 'new-ficha';
+    if (screenId === 'setup-screen') return 'setup-screen';
+    if (screenId === 'home-screen') return 'home-screen';
+    if (screenId === 'fichas-screen') return 'fichas-screen';
+    return '';
+  })();
+
+  document.querySelectorAll('.app-menu-btn').forEach(btn => {
+    const target = btn.getAttribute('data-menu-target');
+    btn.classList.toggle('is-active', target === activeTarget);
+  });
+}
+
+function getExerciseSummary(ex) {
+  if (ex.mode === 'serie') {
+    const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
+    const seriesRest = Math.max(0, parseInt(ex.seriesRest, 10) || 0);
+    return `${sets} série${sets > 1 ? 's' : ''} · ${seriesRest}s descanso`;
+  }
+  const workTime = Math.max(5, parseInt(ex.workTime, 10) || 45);
+  const restTime = Math.max(0, parseInt(ex.restTime, 10) || 20);
+  return `${workTime}s trabalho / ${restTime}s descanso`;
+}
+
+function getFichaEstimatedMinutes(ficha) {
+  let totalSeconds = 0;
+  ficha.exercises.forEach(ex => {
+    if (ex.mode === 'serie') {
+      const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
+      const seriesRest = Math.max(0, parseInt(ex.seriesRest, 10) || 0);
+      totalSeconds += Math.max(0, sets - 1) * seriesRest;
+    } else {
+      const workTime = Math.max(5, parseInt(ex.workTime, 10) || 45);
+      const restTime = Math.max(0, parseInt(ex.restTime, 10) || 20);
+      totalSeconds += workTime + restTime;
+    }
+  });
+  return Math.max(1, Math.round(totalSeconds / 60));
+}
+
+function getFichaModeStats(ficha) {
+  let tempoCount = 0;
+  let serieCount = 0;
+  ficha.exercises.forEach(ex => {
+    if (ex.mode === 'serie') serieCount++;
+    else tempoCount++;
+  });
+  return { tempoCount, serieCount };
+}
+
+function formatDateTime(isoStr) {
+  const d = new Date(isoStr);
+  return d.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+}
+
+function getProgressStats() {
+  const history = appData.workoutHistory || [];
+  const totalSessions = history.length;
+  const totalMinutes = history.reduce((sum, item) => sum + (item.elapsedMin || 0), 0);
+  const recent = history.slice(-7);
+  return {
+    totalSessions,
+    totalMinutes,
+    recentSessions: recent.length
+  };
+}
+
+function upsertLibraryFromExercises(exercises) {
+  const map = new Map((appData.exerciseLibrary || []).map(ex => [ex.name.toLowerCase(), ex]));
+  exercises.forEach(ex => {
+    map.set(ex.name.toLowerCase(), { ...ex, muscles: [...(ex.muscles || [])] });
+  });
+  appData.exerciseLibrary = Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 }
 
 // ── HOME ───────────────────────────────────────────────────
@@ -884,12 +1297,17 @@ function renderHome() {
   const activeFicha = appData.fichas.find(f => f.id === appData.activeFichaId);
 
   if (activeFicha) {
+    const modeStats = getFichaModeStats(activeFicha);
+    const modeParts = [];
+    if (modeStats.tempoCount) modeParts.push(`${modeStats.tempoCount} por tempo`);
+    if (modeStats.serieCount) modeParts.push(`${modeStats.serieCount} por série`);
+    const modeText = modeParts.length ? modeParts.join(' · ') : 'Sem exercícios';
     wrap.innerHTML = `
       <div class="active-banner">
         <div class="active-banner-left">
           <div class="active-banner-tag">✅ Ficha Ativa</div>
           <div class="active-banner-name">${esc(activeFicha.name)}</div>
-          <div class="active-banner-info">${activeFicha.exercises.length} exercício${activeFicha.exercises.length !== 1 ? 's' : ''} · ${activeFicha.workTime}s trabalho / ${activeFicha.restTime}s descanso</div>
+          <div class="active-banner-info">${activeFicha.exercises.length} exercício${activeFicha.exercises.length !== 1 ? 's' : ''} · ${modeText}</div>
         </div>
         <button class="active-banner-btn" onclick="goToSetup('${activeFicha.id}')">🔥 Treinar</button>
       </div>`;
@@ -902,6 +1320,35 @@ function renderHome() {
         <button class="btn btn-primary" onclick="showScreen('fichas-screen')" style="font-size:.9rem;padding:.7rem 1.5rem;margin-top:.25rem;">Ver Fichas</button>
       </div>`;
   }
+  renderHistoryPanel();
+}
+
+function renderHistoryPanel() {
+  const panel = document.getElementById('history-panel');
+  if (!panel) return;
+  const stats = getProgressStats();
+  const history = (appData.workoutHistory || []).slice(-5).reverse();
+  const rows = history.map(item => `
+    <div class="history-row">
+      <div>
+        <div class="history-row-main">${esc(item.fichaName || 'Treino')}</div>
+        <div class="history-row-sub">${item.exerciseCount || 0} exercícios · ${item.elapsedMin || 0} min · ${item.totalSetCount || 0} séries</div>
+      </div>
+      <div class="history-row-sub">${formatDateTime(item.date)}</div>
+    </div>`).join('');
+
+  panel.innerHTML = `
+    <div class="history-head">
+      <div class="history-title">Histórico Recente</div>
+      <div class="history-stats">
+        <span class="history-chip">${stats.totalSessions} sessões</span>
+        <span class="history-chip">${stats.totalMinutes} min total</span>
+        <span class="history-chip">${stats.recentSessions} últimas 7</span>
+      </div>
+    </div>
+    <div class="history-list">
+      ${rows || '<div class="history-empty">Nenhum treino concluído ainda.</div>'}
+    </div>`;
 }
 
 // ── FICHAS LIST ────────────────────────────────────────────
@@ -918,6 +1365,11 @@ function renderFichasList() {
 
   list.innerHTML = appData.fichas.map(f => {
     const isActive = f.id === appData.activeFichaId;
+    const modeStats = getFichaModeStats(f);
+    const modeParts = [];
+    if (modeStats.tempoCount) modeParts.push(`${modeStats.tempoCount} por tempo`);
+    if (modeStats.serieCount) modeParts.push(`${modeStats.serieCount} por série`);
+    const modeText = modeParts.length ? modeParts.join(' · ') : 'Sem exercícios';
     const chips = f.exercises.slice(0,6).map(e => `<span class="ficha-ex-chip">${esc(e.name)}</span>`).join('');
     const more = f.exercises.length > 6 ? `<span class="ficha-ex-chip">+${f.exercises.length - 6}</span>` : '';
     return `
@@ -925,7 +1377,7 @@ function renderFichasList() {
         <div class="ficha-card-header">
           <div>
             <div class="ficha-card-name">${esc(f.name)}</div>
-            <div class="ficha-card-meta">${f.exercises.length} exercícios · ${f.workTime}s trabalho / ${f.restTime}s descanso</div>
+            <div class="ficha-card-meta">${f.exercises.length} exercícios · ${modeText}</div>
           </div>
           ${isActive ? '<div class="ficha-active-badge">✅ Ativa</div>' : ''}
         </div>
@@ -949,14 +1401,77 @@ function setActiveFicha(id) {
 
 // ── EDITOR ─────────────────────────────────────────────────
 let editorExercises = [];
+let editorEditingIndex = -1;
+let dragExerciseIndex = -1;
+
+function showEditorFeedback(message, type = 'error') {
+  const box = document.getElementById('editor-feedback');
+  box.className = `editor-feedback ${type}`;
+  box.textContent = message;
+}
+
+function clearEditorFeedback() {
+  const box = document.getElementById('editor-feedback');
+  box.className = 'editor-feedback';
+  box.textContent = '';
+}
+
+function validateExerciseInput() {
+  const name = document.getElementById('new-ex-name').value.trim();
+  if (!name) return 'Informe o nome do exercício.';
+  const mode = document.getElementById('new-ex-mode').value;
+  if (mode === 'serie') {
+    const sets = parseInt(document.getElementById('new-ex-sets').value, 10);
+    const rest = parseInt(document.getElementById('new-ex-series-rest').value, 10);
+    if (!Number.isFinite(sets) || sets < 1 || sets > 20) return 'Séries devem estar entre 1 e 20.';
+    if (!Number.isFinite(rest) || rest < 0 || rest > 300) return 'Descanso entre séries deve estar entre 0 e 300 segundos.';
+  } else {
+    const work = parseInt(document.getElementById('new-ex-work-time').value, 10);
+    const rest = parseInt(document.getElementById('new-ex-rest-time').value, 10);
+    if (!Number.isFinite(work) || work < 5 || work > 300) return 'Tempo de trabalho deve estar entre 5 e 300 segundos.';
+    if (!Number.isFinite(rest) || rest < 0 || rest > 300) return 'Descanso deve estar entre 0 e 300 segundos.';
+  }
+  return null;
+}
+
+function renderLibraryOptions() {
+  const select = document.getElementById('library-ex-select');
+  if (!select) return;
+  const options = (appData.exerciseLibrary || []).slice().sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  select.innerHTML = `<option value="">Selecionar da biblioteca...</option>` + options.map(ex => {
+    return `<option value="${esc(ex.name)}">${esc(ex.name)} (${esc(getExerciseSummary(ex))})</option>`;
+  }).join('');
+}
+
+function applyLibraryExercise() {
+  const select = document.getElementById('library-ex-select');
+  const picked = (appData.exerciseLibrary || []).find(ex => ex.name === select.value);
+  if (!picked) {
+    showEditorFeedback('Selecione um exercício da biblioteca.', 'error');
+    return;
+  }
+  document.getElementById('new-ex-name').value = picked.name || '';
+  document.getElementById('new-ex-name-pt').value = picked.namePT || '';
+  document.getElementById('new-ex-level').value = picked.level || 'Intermediário';
+  document.getElementById('new-ex-muscles').value = (picked.muscles || []).join(', ');
+  document.getElementById('new-ex-tip').value = picked.tip || '';
+  document.getElementById('new-ex-mode').value = picked.mode === 'serie' ? 'serie' : 'tempo';
+  handleModeChange();
+  document.getElementById('new-ex-work-time').value = picked.workTime || 45;
+  document.getElementById('new-ex-rest-time').value = picked.restTime || 20;
+  document.getElementById('new-ex-sets').value = picked.sets || 3;
+  document.getElementById('new-ex-series-rest').value = picked.seriesRest || 30;
+  showEditorFeedback('Exercício carregado da biblioteca.', 'success');
+}
 
 function openNewFicha() {
   document.getElementById('editor-id').value = '';
   document.getElementById('editor-name').value = '';
-  document.getElementById('editor-work-time').value = '45';
-  document.getElementById('editor-rest-time').value = '20';
   document.getElementById('editor-screen-title').innerHTML = 'Nova <span>Ficha</span>';
   editorExercises = [];
+  editorEditingIndex = -1;
+  clearEditorFeedback();
+  renderLibraryOptions();
   renderEditorExercises();
   closeAddForm();
   showScreen('editor-screen');
@@ -967,10 +1482,11 @@ function editFicha(id) {
   if (!f) return;
   document.getElementById('editor-id').value = f.id;
   document.getElementById('editor-name').value = f.name;
-  document.getElementById('editor-work-time').value = f.workTime;
-  document.getElementById('editor-rest-time').value = f.restTime;
   document.getElementById('editor-screen-title').innerHTML = `Editar <span>Ficha</span>`;
-  editorExercises = f.exercises.map(e => ({...e, muscles: [...(e.muscles||[])]}));
+  editorExercises = f.exercises.map(e => ({ ...e, muscles: [...(e.muscles || [])] }));
+  editorEditingIndex = -1;
+  clearEditorFeedback();
+  renderLibraryOptions();
   renderEditorExercises();
   closeAddForm();
   showScreen('editor-screen');
@@ -986,14 +1502,27 @@ function renderEditorExercises() {
   list.innerHTML = editorExercises.map((ex, i) => {
     const lvlClass = ex.level === 'Avançado' ? 'level-avancado' : ex.level === 'Iniciante' ? 'level-iniciante' : 'level-intermediario';
     const muscleTags = (ex.muscles||[]).map(m => `<span class="detail-chip">${esc(m)}</span>`).join('');
+    const modeChip = ex.mode === 'serie' ? 'Por Série' : 'Por Tempo';
+    const configChip = getExerciseSummary(ex);
+    const upDisabled = i === 0 ? 'disabled' : '';
+    const downDisabled = i === editorExercises.length - 1 ? 'disabled' : '';
     return `
-      <div class="exercise-item">
+      <div class="exercise-item" draggable="true"
+        ondragstart="startExerciseDrag(${i}, event)"
+        ondragover="allowExerciseDrop(${i}, event)"
+        ondrop="dropExercise(${i}, event)"
+        ondragend="endExerciseDrag()">
         <div class="exercise-item-header">
           <span class="exercise-item-num">${i+1}.</span>
           <span class="exercise-item-name">${esc(ex.name)}</span>
+          <button class="btn-icon" onclick="editExercise(${i})" style="padding:.3rem .6rem;font-size:.75rem;">✏️</button>
+          <button class="btn-icon" onclick="moveExercise(${i},-1)" style="padding:.3rem .55rem;font-size:.75rem;${upDisabled ? 'opacity:.35;cursor:not-allowed;' : ''}" ${upDisabled}>↑</button>
+          <button class="btn-icon" onclick="moveExercise(${i},1)" style="padding:.3rem .55rem;font-size:.75rem;${downDisabled ? 'opacity:.35;cursor:not-allowed;' : ''}" ${downDisabled}>↓</button>
           <button class="btn-icon btn-danger" onclick="removeExercise(${i})" style="padding:.3rem .6rem;font-size:.75rem;">✕</button>
         </div>
         <div class="exercise-item-details">
+          <span class="detail-chip">${modeChip}</span>
+          <span class="detail-chip">${configChip}</span>
           <span class="detail-chip ${lvlClass}">${esc(ex.level)}</span>
           ${muscleTags}
         </div>
@@ -1012,21 +1541,71 @@ function toggleAddForm() {
     document.getElementById('new-ex-muscles').value = '';
     document.getElementById('new-ex-tip').value = '';
     document.getElementById('new-ex-level').value = 'Intermediário';
+    document.getElementById('new-ex-mode').value = 'tempo';
+    document.getElementById('new-ex-work-time').value = '45';
+    document.getElementById('new-ex-rest-time').value = '20';
+    document.getElementById('new-ex-sets').value = '3';
+    document.getElementById('new-ex-series-rest').value = '30';
+    handleModeChange();
+    renderLibraryOptions();
+    const submitBtn = document.getElementById('add-ex-submit-btn');
+    submitBtn.textContent = editorEditingIndex >= 0 ? 'Salvar Alterações' : 'Adicionar';
     setTimeout(() => document.getElementById('new-ex-name').focus(), 50);
+  } else {
+    editorEditingIndex = -1;
   }
 }
-function closeAddForm() { document.getElementById('add-exercise-form').classList.remove('open'); }
+function closeAddForm() {
+  document.getElementById('add-exercise-form').classList.remove('open');
+  editorEditingIndex = -1;
+  document.getElementById('add-ex-submit-btn').textContent = 'Adicionar';
+}
+
+function handleModeChange() {
+  const mode = document.getElementById('new-ex-mode').value;
+  const timeFields = document.getElementById('mode-time-fields');
+  const seriesFields = document.getElementById('mode-series-fields');
+  if (mode === 'serie') {
+    timeFields.style.display = 'none';
+    seriesFields.style.display = 'grid';
+  } else {
+    timeFields.style.display = 'grid';
+    seriesFields.style.display = 'none';
+  }
+}
 
 function addExerciseToEditor() {
+  clearEditorFeedback();
+  const validationError = validateExerciseInput();
+  if (validationError) {
+    showEditorFeedback(validationError, 'error');
+    return;
+  }
   const name = document.getElementById('new-ex-name').value.trim();
-  if (!name) { document.getElementById('new-ex-name').focus(); return; }
   const namePT  = document.getElementById('new-ex-name-pt').value.trim();
+  const mode    = document.getElementById('new-ex-mode').value;
   const level   = document.getElementById('new-ex-level').value;
   const muscles = document.getElementById('new-ex-muscles').value.split(',').map(s => s.trim()).filter(Boolean);
   const tip     = document.getElementById('new-ex-tip').value.trim();
-  editorExercises.push({ name, namePT, level, muscles, tip });
+  const exercise = { name, namePT, level, muscles, tip, mode };
+  if (mode === 'serie') {
+    exercise.sets = Math.max(1, parseInt(document.getElementById('new-ex-sets').value, 10) || 3);
+    exercise.seriesRest = Math.max(0, parseInt(document.getElementById('new-ex-series-rest').value, 10) || 30);
+  } else {
+    exercise.workTime = Math.max(5, parseInt(document.getElementById('new-ex-work-time').value, 10) || 45);
+    exercise.restTime = Math.max(0, parseInt(document.getElementById('new-ex-rest-time').value, 10) || 20);
+  }
+  if (editorEditingIndex >= 0) {
+    editorExercises[editorEditingIndex] = exercise;
+    showEditorFeedback('Exercício atualizado com sucesso.', 'success');
+  } else {
+    editorExercises.push(exercise);
+    showEditorFeedback('Exercício adicionado com sucesso.', 'success');
+  }
+  upsertLibraryFromExercises([exercise]);
   renderEditorExercises();
   closeAddForm();
+  editorEditingIndex = -1;
 }
 
 function removeExercise(i) {
@@ -1034,25 +1613,92 @@ function removeExercise(i) {
   renderEditorExercises();
 }
 
-function saveFicha() {
-  const name = document.getElementById('editor-name').value.trim();
-  if (!name) { document.getElementById('editor-name').focus(); return; }
-  if (editorExercises.length === 0) { alert('Adicione pelo menos um exercício.'); return; }
+function editExercise(i) {
+  const ex = editorExercises[i];
+  if (!ex) return;
+  editorEditingIndex = i;
+  const form = document.getElementById('add-exercise-form');
+  if (!form.classList.contains('open')) form.classList.add('open');
+  renderLibraryOptions();
+  document.getElementById('new-ex-name').value = ex.name || '';
+  document.getElementById('new-ex-name-pt').value = ex.namePT || '';
+  document.getElementById('new-ex-level').value = ex.level || 'Intermediário';
+  document.getElementById('new-ex-muscles').value = (ex.muscles || []).join(', ');
+  document.getElementById('new-ex-tip').value = ex.tip || '';
+  document.getElementById('new-ex-mode').value = ex.mode === 'serie' ? 'serie' : 'tempo';
+  document.getElementById('new-ex-work-time').value = ex.workTime || 45;
+  document.getElementById('new-ex-rest-time').value = ex.restTime || 20;
+  document.getElementById('new-ex-sets').value = ex.sets || 3;
+  document.getElementById('new-ex-series-rest').value = ex.seriesRest || 30;
+  handleModeChange();
+  document.getElementById('add-ex-submit-btn').textContent = 'Salvar Alterações';
+  showEditorFeedback(`Editando: ${ex.name}`, 'success');
+}
 
-  const workTime = parseInt(document.getElementById('editor-work-time').value) || 45;
-  const restTime = parseInt(document.getElementById('editor-rest-time').value) || 20;
+function moveExercise(index, direction) {
+  const target = index + direction;
+  if (target < 0 || target >= editorExercises.length) return;
+  const temp = editorExercises[index];
+  editorExercises[index] = editorExercises[target];
+  editorExercises[target] = temp;
+  renderEditorExercises();
+}
+
+function startExerciseDrag(index, event) {
+  dragExerciseIndex = index;
+  event.dataTransfer.effectAllowed = 'move';
+  event.currentTarget.classList.add('dragging');
+}
+
+function allowExerciseDrop(index, event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  event.currentTarget.classList.add('drag-over');
+}
+
+function dropExercise(index, event) {
+  event.preventDefault();
+  if (dragExerciseIndex < 0 || dragExerciseIndex === index) return;
+  const [moved] = editorExercises.splice(dragExerciseIndex, 1);
+  editorExercises.splice(index, 0, moved);
+  dragExerciseIndex = -1;
+  renderEditorExercises();
+}
+
+function endExerciseDrag() {
+  dragExerciseIndex = -1;
+  document.querySelectorAll('.exercise-item').forEach(item => {
+    item.classList.remove('dragging');
+    item.classList.remove('drag-over');
+  });
+}
+
+function saveFicha() {
+  clearEditorFeedback();
+  const name = document.getElementById('editor-name').value.trim();
+  if (!name) {
+    showEditorFeedback('Informe o nome da ficha antes de salvar.', 'error');
+    document.getElementById('editor-name').focus();
+    return;
+  }
+  if (editorExercises.length === 0) {
+    showEditorFeedback('Adicione pelo menos um exercício para salvar a ficha.', 'error');
+    return;
+  }
+
   const id       = document.getElementById('editor-id').value;
 
   if (id) {
     const idx = appData.fichas.findIndex(f => f.id === id);
     if (idx !== -1) {
-      appData.fichas[idx] = { id, name, workTime, restTime, exercises: editorExercises };
+      appData.fichas[idx] = { id, name, exercises: editorExercises };
     }
   } else {
     const newId = 'ficha-' + Date.now();
-    appData.fichas.push({ id: newId, name, workTime, restTime, exercises: editorExercises });
+    appData.fichas.push({ id: newId, name, exercises: editorExercises });
     if (!appData.activeFichaId) appData.activeFichaId = newId;
   }
+  upsertLibraryFromExercises(editorExercises);
   saveData(appData);
   renderFichasList();
   renderHome();
@@ -1085,46 +1731,98 @@ function confirmDelete() {
 
 // ── SETUP ──────────────────────────────────────────────────
 let currentFicha = null;
-let totalSeries  = 2;
 
 function goToSetup(fichaId) {
   const f = appData.fichas.find(f => f.id === fichaId);
   if (!f) return;
   currentFicha = f;
-  totalSeries = 2;
   document.getElementById('setup-brand').innerHTML = esc(f.name).replace(' ', ' <span>') + '</span>';
   document.getElementById('setup-ficha-name').textContent = f.name;
-  document.getElementById('setup-ficha-sub').textContent = `${f.workTime}s trabalho / ${f.restTime}s descanso`;
-  document.getElementById('series-val').textContent = totalSeries;
-  const mins = Math.round(totalSeries * f.exercises.length * (f.workTime + f.restTime) / 60);
-  document.getElementById('series-hint').textContent = `${totalSeries} série${totalSeries>1?'s':''} · ${f.exercises.length} exercícios · ~${mins} min`;
+  const modeStats = getFichaModeStats(f);
+  const modeParts = [];
+  if (modeStats.tempoCount) modeParts.push(`${modeStats.tempoCount} por tempo`);
+  if (modeStats.serieCount) modeParts.push(`${modeStats.serieCount} por série`);
+  document.getElementById('setup-ficha-sub').textContent = modeParts.join(' · ');
+  const mins = getFichaEstimatedMinutes(f);
+  document.getElementById('series-hint').textContent = `${f.exercises.length} exercício${f.exercises.length > 1 ? 's' : ''} · ~${mins} min`;
   const previewList = document.getElementById('setup-preview-list');
-  previewList.innerHTML = f.exercises.map(e => `<li>${esc(e.name)}</li>`).join('');
+  previewList.innerHTML = f.exercises.map(e => `<li>${esc(e.name)} (${esc(getExerciseSummary(e))})</li>`).join('');
+  document.getElementById('set-sound').checked = !!appData.settings.soundEnabled;
+  document.getElementById('set-countdown').checked = !!appData.settings.countdownEnabled;
+  document.getElementById('set-vibration').checked = !!appData.settings.vibrationEnabled;
+  document.getElementById('set-volume').value = Math.max(0, Math.min(100, parseInt(appData.settings.volume, 10) || 80));
   showScreen('setup-screen');
-}
-
-function changeSeries(delta) {
-  totalSeries = Math.max(1, Math.min(10, totalSeries + delta));
-  document.getElementById('series-val').textContent = totalSeries;
-  const f = currentFicha;
-  const mins = Math.round(totalSeries * f.exercises.length * (f.workTime + f.restTime) / 60);
-  document.getElementById('series-hint').textContent = `${totalSeries} série${totalSeries>1?'s':''} · ${f.exercises.length} exercícios · ~${mins} min`;
 }
 
 // ── TIMER ──────────────────────────────────────────────────
 const CIRC = 276.46;
-let curSeries  = 0;
-let curExIndex = 0;
-let phase      = 'work';
-let timeLeft   = 45;
+let workoutPhases = [];
+let phaseIndex = 0;
+let timeLeft = 0;
 let timer      = null;
 let paused     = false;
 let startTime  = null;
 
+function buildWorkoutPhases(ficha) {
+  const phases = [];
+  ficha.exercises.forEach((ex, exIndex) => {
+    if (ex.mode === 'serie') {
+      const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
+      const seriesRest = Math.max(0, parseInt(ex.seriesRest, 10) || 0);
+      for (let setIndex = 1; setIndex <= sets; setIndex++) {
+        phases.push({
+          type: 'work',
+          mode: 'serie',
+          duration: 0,
+          exerciseIndex: exIndex,
+          setIndex,
+          totalSets: sets
+        });
+        if (setIndex < sets && seriesRest > 0) {
+          phases.push({
+            type: 'rest',
+            mode: 'serie',
+            duration: seriesRest,
+            exerciseIndex: exIndex,
+            setIndex,
+            totalSets: sets
+          });
+        }
+      }
+    } else {
+      const workTime = Math.max(5, parseInt(ex.workTime, 10) || 45);
+      const restTime = Math.max(0, parseInt(ex.restTime, 10) || 20);
+      phases.push({
+        type: 'work',
+        mode: 'tempo',
+        duration: workTime,
+        exerciseIndex: exIndex
+      });
+      if (restTime > 0) {
+        phases.push({
+          type: 'rest',
+          mode: 'tempo',
+          duration: restTime,
+          exerciseIndex: exIndex
+        });
+      }
+    }
+  });
+  return phases;
+}
+
 function startWorkout() {
   getACtx();
-  curSeries  = 0; curExIndex = 0; phase = 'work';
-  timeLeft   = currentFicha.workTime; paused = false; startTime = Date.now();
+  appData.settings.soundEnabled = document.getElementById('set-sound').checked;
+  appData.settings.countdownEnabled = document.getElementById('set-countdown').checked;
+  appData.settings.vibrationEnabled = document.getElementById('set-vibration').checked;
+  appData.settings.volume = Math.max(0, Math.min(100, parseInt(document.getElementById('set-volume').value, 10) || 80));
+  saveData(appData);
+  workoutPhases = buildWorkoutPhases(currentFicha);
+  if (!workoutPhases.length) return;
+  phaseIndex = 0;
+  paused = false;
+  startTime = Date.now();
   document.getElementById('timer-brand').innerHTML = esc(currentFicha.name).replace(' ', ' <span>') + '</span>';
   showScreen('timer-screen');
   updateUI();
@@ -1135,7 +1833,9 @@ function runTick() { clearInterval(timer); timer = setInterval(tick, 1000); }
 
 function tick() {
   if (paused) return;
-  if (timeLeft <= 3 && timeLeft > 0) playCountdown(timeLeft);
+  const currentPhase = workoutPhases[phaseIndex];
+  if (!currentPhase || currentPhase.duration <= 0) return;
+  if (appData.settings.countdownEnabled && timeLeft <= 3 && timeLeft > 0) playCountdown(timeLeft);
   timeLeft--;
   if (timeLeft < 0) { advance(); return; }
   updateRing();
@@ -1143,21 +1843,26 @@ function tick() {
 }
 
 function advance() {
-  const f = currentFicha;
-  if (phase === 'work') {
-    playWorkEnd(); phase = 'rest'; timeLeft = f.restTime; updateUI(); return;
+  const currentPhase = workoutPhases[phaseIndex];
+  if (!currentPhase) return;
+
+  if (appData.settings.vibrationEnabled && navigator.vibrate) {
+    navigator.vibrate(currentPhase.type === 'work' ? [100, 40, 100] : [160]);
   }
-  playRestEnd(); curExIndex++;
-  if (curExIndex >= f.exercises.length) {
-    curExIndex = 0; curSeries++;
-    if (curSeries >= totalSeries) { clearInterval(timer); showDone(); return; }
-  }
-  phase = 'work'; timeLeft = f.workTime; updateUI();
+
+  if (currentPhase.type === 'work') playWorkEnd();
+  else playRestEnd();
+
+  phaseIndex++;
+  if (phaseIndex >= workoutPhases.length) { clearInterval(timer); showDone(); return; }
+  updateUI();
 }
 
 function skipPhase() { timeLeft = 0; advance(); }
 
 function togglePause() {
+  const currentPhase = workoutPhases[phaseIndex];
+  if (!currentPhase || currentPhase.duration <= 0) return;
   paused = !paused;
   document.getElementById('pause-btn').textContent = paused ? '▶ CONTINUAR' : '⏸ PAUSAR';
 }
@@ -1165,9 +1870,12 @@ function togglePause() {
 function exitWorkout() { clearInterval(timer); showScreen('home-screen'); renderHome(); }
 
 function updateUI() {
-  const f      = currentFicha;
-  const ex     = f.exercises[curExIndex];
-  const isWork = phase === 'work';
+  const f = currentFicha;
+  const currentPhase = workoutPhases[phaseIndex];
+  if (!currentPhase) return;
+  const ex = f.exercises[currentPhase.exerciseIndex];
+  const isWork = currentPhase.type === 'work';
+  const isTimed = currentPhase.duration > 0;
 
   const pLabel = document.getElementById('phase-label');
   pLabel.textContent = isWork ? 'TRABALHO' : 'DESCANSO';
@@ -1178,52 +1886,103 @@ function updateUI() {
   const ringColor = isWork ? 'var(--work)' : 'var(--rest)';
   ring.style.stroke = ringColor; ringGlow.style.stroke = ringColor;
 
-  const t = isWork ? f.workTime : f.restTime;
-  timeLeft = t;
-  document.getElementById('ring-time').textContent = t;
-  document.getElementById('ring-sub').textContent = isWork ? 'segundos' : 'descanso';
-  updateRing();
+  const pauseBtn = document.getElementById('pause-btn');
+  const skipBtn = document.getElementById('skip-btn');
+
+  if (isTimed) {
+    timeLeft = currentPhase.duration;
+    document.getElementById('ring-time').textContent = timeLeft;
+    document.getElementById('ring-sub').textContent = isWork ? 'segundos' : 'descanso';
+    pauseBtn.style.opacity = '1';
+    pauseBtn.style.pointerEvents = 'auto';
+    pauseBtn.textContent = '⏸ PAUSAR';
+    skipBtn.textContent = '⏭ PULAR';
+    paused = false;
+    updateRing();
+  } else {
+    timeLeft = 0;
+    paused = false;
+    document.getElementById('ring-time').textContent = 'GO';
+    document.getElementById('ring-sub').textContent = 'conclua a série';
+    ring.style.strokeDashoffset = 0;
+    ringGlow.style.strokeDashoffset = 0;
+    pauseBtn.style.opacity = '.35';
+    pauseBtn.style.pointerEvents = 'none';
+    pauseBtn.textContent = '⏸ PAUSAR';
+    skipBtn.textContent = '✅ CONCLUIR SÉRIE';
+  }
 
   if (isWork) {
     document.getElementById('ex-card').className = 'exercise-card fade-in';
-    document.getElementById('ex-number').textContent = `EXERCÍCIO ${curExIndex+1} DE ${f.exercises.length}`;
+    if (currentPhase.mode === 'serie') {
+      document.getElementById('ex-number').textContent = `EXERCÍCIO ${currentPhase.exerciseIndex + 1} · SÉRIE ${currentPhase.setIndex}/${currentPhase.totalSets}`;
+    } else {
+      document.getElementById('ex-number').textContent = `EXERCÍCIO ${currentPhase.exerciseIndex + 1} DE ${f.exercises.length}`;
+    }
     document.getElementById('ex-name').textContent    = ex.name;
     document.getElementById('ex-name-pt').textContent = ex.namePT || '';
     const tagsEl = document.getElementById('ex-tags');
-    tagsEl.innerHTML = (ex.muscles||[]).map(m => `<span class="tag">${esc(m)}</span>`).join('');
+    const baseTags = (ex.muscles||[]).map(m => `<span class="tag">${esc(m)}</span>`);
+    baseTags.unshift(`<span class="tag">${ex.mode === 'serie' ? 'POR SÉRIE' : 'POR TEMPO'}</span>`);
+    baseTags.unshift(`<span class="tag">${esc(getExerciseSummary(ex))}</span>`);
+    tagsEl.innerHTML = baseTags.join('');
     document.getElementById('ex-tip').textContent = ex.tip || '';
     const lvl = document.getElementById('level-badge');
     const cls = ex.level === 'Avançado' ? 'avancado' : ex.level === 'Intermediário' ? 'intermediario' : 'iniciante';
     lvl.className = `level-badge ${cls}`; lvl.textContent = ex.level;
   } else {
     document.getElementById('ex-card').className = 'exercise-card rest-mode';
+    document.getElementById('ex-number').textContent = ex.mode === 'serie'
+      ? `DESCANSO · SÉRIE ${currentPhase.setIndex}/${currentPhase.totalSets}`
+      : `DESCANSO · EXERCÍCIO ${currentPhase.exerciseIndex + 1}`;
+    document.getElementById('ex-name').textContent = ex.name;
+    document.getElementById('ex-name-pt').textContent = ex.namePT || '';
+    document.getElementById('ex-tags').innerHTML = `<span class="tag">RECUPERAÇÃO</span><span class="tag">${esc(getExerciseSummary(ex))}</span>`;
+    document.getElementById('ex-tip').textContent = 'Respire fundo e prepare a próxima execução.';
+    const lvl = document.getElementById('level-badge');
+    lvl.className = 'level-badge intermediario';
+    lvl.textContent = 'Descanso';
   }
 
-  document.getElementById('cur-series').textContent = curSeries + 1;
-  document.getElementById('tot-series').textContent = totalSeries;
+  if (currentPhase.mode === 'serie') {
+    document.getElementById('series-badge-label').textContent = 'Série';
+    document.getElementById('cur-series').textContent = currentPhase.setIndex;
+    document.getElementById('tot-series').textContent = currentPhase.totalSets;
+  } else {
+    document.getElementById('series-badge-label').textContent = 'Bloco';
+    const timedPhases = workoutPhases.filter(p => p.mode === 'tempo' && p.type === 'work');
+    const currentTimedIndex = timedPhases.findIndex(p => p.exerciseIndex === currentPhase.exerciseIndex);
+    document.getElementById('cur-series').textContent = currentTimedIndex + 1;
+    document.getElementById('tot-series').textContent = timedPhases.length || 1;
+  }
 
-  const nextIdx = (curExIndex + 1) % f.exercises.length;
-  const isFinal = curExIndex === f.exercises.length - 1 && curSeries === totalSeries - 1;
+  const nextPhase = workoutPhases[phaseIndex + 1];
   const nextEl  = document.getElementById('next-preview');
-  if (isFinal && !isWork) {
+  if (!nextPhase) {
     nextEl.querySelector('.next-label').textContent = 'Último! 💪';
     document.getElementById('next-name').textContent = '';
   } else {
     nextEl.querySelector('.next-label').textContent = 'A seguir →';
-    document.getElementById('next-name').textContent = f.exercises[nextIdx].name;
+    const nextEx = f.exercises[nextPhase.exerciseIndex];
+    if (nextPhase.type === 'rest') {
+      document.getElementById('next-name').textContent = `Descanso (${nextPhase.duration}s)`;
+    } else if (nextPhase.mode === 'serie') {
+      document.getElementById('next-name').textContent = `${nextEx.name} · Série ${nextPhase.setIndex}/${nextPhase.totalSets}`;
+    } else {
+      document.getElementById('next-name').textContent = nextEx.name;
+    }
   }
 
-  const totalEx = totalSeries * f.exercises.length;
-  const doneEx  = curSeries * f.exercises.length + curExIndex;
-  const pct = (doneEx / totalEx) * 100;
+  const pct = (phaseIndex / workoutPhases.length) * 100;
   const bar = document.getElementById('overall-bar');
   bar.style.width = pct + '%';
   bar.style.background = isWork ? 'var(--work)' : 'var(--rest)';
 }
 
 function updateRing() {
-  const f = currentFicha;
-  const total = phase === 'work' ? f.workTime : f.restTime;
+  const currentPhase = workoutPhases[phaseIndex];
+  if (!currentPhase || currentPhase.duration <= 0) return;
+  const total = currentPhase.duration;
   const frac  = timeLeft / total;
   const offset = CIRC * (1 - frac);
   document.getElementById('ring').style.strokeDashoffset = offset;
@@ -1235,11 +1994,26 @@ function showDone() {
   playFinish();
   const f = currentFicha;
   const elapsed = Math.round((Date.now() - startTime) / 60000);
-  document.getElementById('stat-series').textContent = totalSeries;
+  const totalSetCount = f.exercises.reduce((sum, ex) => sum + (ex.mode === 'serie' ? (Math.max(1, parseInt(ex.sets, 10) || 1)) : 1), 0);
+
+  appData.workoutHistory.push({
+    date: new Date().toISOString(),
+    fichaId: f.id,
+    fichaName: f.name,
+    elapsedMin: elapsed,
+    exerciseCount: f.exercises.length,
+    totalSetCount
+  });
+  if (appData.workoutHistory.length > 200) {
+    appData.workoutHistory = appData.workoutHistory.slice(-200);
+  }
+  saveData(appData);
+
+  document.getElementById('stat-series').textContent = totalSetCount;
   document.getElementById('stat-exercises').textContent = f.exercises.length;
   document.getElementById('stat-time').textContent = elapsed;
   document.getElementById('done-sub').textContent =
-    `${totalSeries} série${totalSeries>1?'s':''} · ${f.name} · ${Math.round(totalSeries * f.exercises.length * (f.workTime + f.restTime) / 60)} min de treino`;
+    `${f.exercises.length} exercício${f.exercises.length>1?'s':''} · ${f.name} · ~${getFichaEstimatedMinutes(f)} min de treino`;
   showScreen('done-screen');
 }
 
@@ -1249,16 +2023,21 @@ function returnHome() { showScreen('home-screen'); renderHome(); }
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let actx = null;
 function getACtx() { if (!actx) actx = new AudioCtx(); return actx; }
+function getVolumeScale() {
+  const val = Math.max(0, Math.min(100, parseInt(appData.settings?.volume, 10) || 80));
+  return val / 100;
+}
 
 function noise(dur, vol, t0) {
   try {
+    if (!appData.settings?.soundEnabled) return;
     const ctx = getACtx(); const bufSize = ctx.sampleRate * dur;
     const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
     const data = buf.getChannelData(0);
     for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
     const src = ctx.createBufferSource(); src.buffer = buf;
     const gain = ctx.createGain(); src.connect(gain); gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(vol, ctx.currentTime + t0);
+    gain.gain.setValueAtTime(vol * getVolumeScale(), ctx.currentTime + t0);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + dur);
     src.start(ctx.currentTime + t0); src.stop(ctx.currentTime + t0 + dur + 0.02);
   } catch(e) {}
@@ -1266,12 +2045,13 @@ function noise(dur, vol, t0) {
 
 function osc(freq, type, vol, attack, decay, t0, sweep) {
   try {
+    if (!appData.settings?.soundEnabled) return;
     const ctx = getACtx(); const o = ctx.createOscillator(); const g = ctx.createGain();
     o.connect(g); g.connect(ctx.destination); o.type = type;
     o.frequency.setValueAtTime(freq, ctx.currentTime + t0);
     if (sweep) o.frequency.exponentialRampToValueAtTime(sweep, ctx.currentTime + t0 + attack + decay);
     g.gain.setValueAtTime(0.001, ctx.currentTime + t0);
-    g.gain.linearRampToValueAtTime(vol, ctx.currentTime + t0 + attack);
+    g.gain.linearRampToValueAtTime(vol * getVolumeScale(), ctx.currentTime + t0 + attack);
     g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + attack + decay);
     o.start(ctx.currentTime + t0); o.stop(ctx.currentTime + t0 + attack + decay + 0.05);
   } catch(e) {}
@@ -1305,6 +2085,7 @@ function esc(str) {
 // ── INIT ───────────────────────────────────────────────────
 renderHome();
 renderFichasList();
+updateAppMenu('home-screen');
 </script>
 </body>
 </html>
