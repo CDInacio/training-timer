@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KB Full Body Timer</title>
+<title>Fichas de Treino</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -12,11 +12,13 @@
     --bg: #0A0A0F;
     --surface: #12121A;
     --surface2: #1C1C28;
+    --surface3: #22223A;
     --text: #F0EEE8;
     --muted: #5A5A7A;
     --advanced: #FF4D1C;
     --intermediate: #FF9A3C;
     --beginner: #00C9A7;
+    --accent: #7C5CFC;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,660 +31,745 @@
     overflow-x: hidden;
   }
 
-  /* ── SETUP SCREEN ───────────────────────────────────── */
-  #setup-screen {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
+  /* ── SHARED ──────────────────────────────────────────── */
+  .screen { display: none; min-height: 100vh; flex-direction: column; }
+  .screen.active { display: flex; }
+
+  .btn {
+    border: none; cursor: pointer; transition: all .2s;
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: .12em;
+  }
+  .btn-primary {
+    background: var(--work); color: white; border-radius: 10px;
+    padding: .9rem 2rem; font-size: 1.1rem;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,77,28,.35); }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text); border-radius: 10px;
+    padding: .9rem 2rem; font-size: 1.1rem;
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .btn-secondary:hover { border-color: rgba(255,255,255,.2); }
+  .btn-ghost {
+    background: none; border: 1px solid rgba(255,255,255,.1);
+    color: var(--muted); border-radius: 6px;
+    padding: .35rem .75rem; font-size: .75rem;
+    font-family: 'Barlow Condensed', sans-serif;
+    letter-spacing: .1em; text-transform: uppercase;
+  }
+  .btn-ghost:hover { border-color: var(--work); color: var(--work); }
+  .btn-icon {
+    background: var(--surface2); border: 1px solid rgba(255,255,255,.06);
+    color: var(--muted); border-radius: 8px; padding: .45rem .7rem;
+    font-size: .85rem; cursor: pointer; transition: all .2s;
+    font-family: 'Barlow Condensed', sans-serif;
+  }
+  .btn-icon:hover { border-color: var(--work); color: var(--work); }
+  .btn-danger { background: rgba(255,77,28,.1); border: 1px solid rgba(255,77,28,.2); color: var(--work); }
+  .btn-danger:hover { background: rgba(255,77,28,.2); }
+
+  /* ── TOP BAR ─────────────────────────────────────────── */
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    flex-shrink: 0;
+  }
+  .top-bar-brand {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.3rem; letter-spacing: .1em; color: var(--muted);
+  }
+  .top-bar-brand span { color: var(--work); }
+  .top-bar-nav { display: flex; gap: .5rem; }
+
+  /* ── HOME SCREEN ─────────────────────────────────────── */
+  #home-screen {
     position: relative;
   }
-
-  #setup-screen::before {
+  #home-screen::before {
     content: '';
-    position: fixed;
-    inset: 0;
-    background: 
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 80% 20%, rgba(255,77,28,.1) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 10% 80%, rgba(124,92,252,.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .home-content {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 2.5rem 1.75rem;
+    gap: 1.5rem; position: relative;
+  }
+
+  .home-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 7vw, 3.5rem);
+    letter-spacing: .06em; text-align: center; line-height: 1;
+  }
+  .home-title span { color: var(--work); }
+
+  .home-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .9rem; font-weight: 300; letter-spacing: .2em;
+    color: var(--muted); text-align: center; text-transform: uppercase;
+  }
+
+  /* active ficha banner */
+  .active-banner {
+    width: 100%; max-width: 520px;
+    background: linear-gradient(135deg, rgba(0,201,167,.12), rgba(0,201,167,.04));
+    border: 1px solid rgba(0,201,167,.25);
+    border-radius: 14px; padding: 1.25rem 1.5rem;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .active-banner-left {}
+  .active-banner-tag {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .7rem; font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--rest); margin-bottom: .3rem;
+  }
+  .active-banner-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; letter-spacing: .04em; line-height: 1;
+  }
+  .active-banner-info {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .8rem; color: var(--muted); margin-top: .2rem;
+  }
+  .active-banner-btn {
+    background: var(--rest); color: #0A0A0F;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
+    letter-spacing: .12em; padding: .75rem 1.5rem;
+    border-radius: 8px; border: none; cursor: pointer; transition: all .2s;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .active-banner-btn:hover { box-shadow: 0 6px 20px rgba(0,201,167,.3); transform: translateY(-1px); }
+
+  .empty-banner {
+    width: 100%; max-width: 520px;
+    background: var(--surface); border: 1px dashed rgba(255,255,255,.1);
+    border-radius: 14px; padding: 2rem;
+    display: flex; flex-direction: column; align-items: center;
+    gap: .75rem; text-align: center;
+  }
+  .empty-icon { font-size: 2.5rem; opacity: .4; }
+  .empty-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 1rem; font-weight: 600; letter-spacing: .1em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .empty-sub { font-size: .85rem; color: var(--muted); }
+
+  .home-actions {
+    display: flex; gap: .75rem; flex-wrap: wrap; justify-content: center;
+  }
+
+  /* ── FICHAS LIST SCREEN ──────────────────────────────── */
+  #fichas-screen { }
+
+  .fichas-content {
+    flex: 1; padding: 1.5rem 1.75rem; max-width: 680px;
+    width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem;
+  }
+  .fichas-header {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .fichas-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.8rem; letter-spacing: .04em;
+  }
+
+  .ficha-card {
+    background: var(--surface);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px; padding: 1.25rem 1.5rem;
+    cursor: pointer; transition: all .2s; position: relative;
+  }
+  .ficha-card:hover { border-color: rgba(255,255,255,.15); transform: translateY(-1px); }
+  .ficha-card.is-active {
+    border-color: rgba(0,201,167,.35);
+    background: linear-gradient(135deg, rgba(0,201,167,.07), var(--surface));
+  }
+  .ficha-card-header {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem;
+  }
+  .ficha-card-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem; letter-spacing: .04em; line-height: 1;
+  }
+  .ficha-card-meta {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .8rem; color: var(--muted); margin-top: .3rem;
+  }
+  .ficha-active-badge {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .65rem; font-weight: 700; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--rest);
+    background: rgba(0,201,167,.12); border: 1px solid rgba(0,201,167,.2);
+    padding: .2rem .6rem; border-radius: 4px; flex-shrink: 0; white-space: nowrap;
+  }
+  .ficha-card-exercises {
+    display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .85rem;
+  }
+  .ficha-ex-chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .7rem; font-weight: 600; letter-spacing: .08em;
+    text-transform: uppercase; padding: .2rem .55rem; border-radius: 4px;
+    background: rgba(255,255,255,.05); color: rgba(240,238,232,.5);
+  }
+  .ficha-card-actions {
+    display: flex; gap: .5rem; margin-top: 1rem; padding-top: .85rem;
+    border-top: 1px solid rgba(255,255,255,.05);
+  }
+
+  /* ── FICHA EDITOR SCREEN ─────────────────────────────── */
+  #editor-screen { }
+
+  .editor-content {
+    flex: 1; padding: 1.5rem 1.75rem; max-width: 680px;
+    width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 1.25rem;
+  }
+
+  .field-label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .75rem; font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .5rem;
+  }
+
+  .field-input {
+    width: 100%; background: var(--surface2);
+    border: 1px solid rgba(255,255,255,.08); border-radius: 8px;
+    padding: .75rem 1rem; color: var(--text);
+    font-family: 'Barlow', sans-serif; font-size: .95rem;
+    transition: border-color .2s; outline: none;
+  }
+  .field-input:focus { border-color: rgba(255,77,28,.4); }
+  .field-input::placeholder { color: var(--muted); }
+
+  .field-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: .75rem;
+  }
+
+  .field-select {
+    width: 100%; background: var(--surface2);
+    border: 1px solid rgba(255,255,255,.08); border-radius: 8px;
+    padding: .75rem 1rem; color: var(--text);
+    font-family: 'Barlow', sans-serif; font-size: .95rem;
+    outline: none; cursor: pointer; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235A5A7A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 1rem center;
+    padding-right: 2.5rem;
+  }
+  .field-select:focus { border-color: rgba(255,77,28,.4); }
+  .field-select option { background: var(--surface2); }
+
+  /* exercises list in editor */
+  .exercises-section {
+    background: var(--surface); border: 1px solid rgba(255,255,255,.06);
+    border-radius: 14px; padding: 1.25rem;
+  }
+  .exercises-section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .exercises-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .8rem; font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted);
+  }
+
+  .exercise-item {
+    background: var(--surface2); border: 1px solid rgba(255,255,255,.06);
+    border-radius: 10px; padding: 1rem 1.1rem; margin-bottom: .6rem;
+    display: flex; flex-direction: column; gap: .6rem;
+  }
+  .exercise-item-header {
+    display: flex; align-items: center; justify-content: space-between; gap: .5rem;
+  }
+  .exercise-item-num {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
+    color: var(--work); flex-shrink: 0;
+  }
+  .exercise-item-name {
+    flex: 1; font-size: .9rem; font-weight: 600;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .exercise-item-details {
+    display: flex; flex-wrap: wrap; gap: .4rem; align-items: center;
+  }
+  .detail-chip {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .7rem; font-weight: 600; letter-spacing: .1em;
+    text-transform: uppercase; padding: .2rem .55rem; border-radius: 4px;
+    background: rgba(255,255,255,.05); color: rgba(240,238,232,.5);
+  }
+  .detail-chip.level-avancado { background: rgba(255,77,28,.12); color: var(--advanced); }
+  .detail-chip.level-intermediario { background: rgba(255,154,60,.12); color: var(--intermediate); }
+  .detail-chip.level-iniciante { background: rgba(0,201,167,.12); color: var(--beginner); }
+  .exercise-item-tip {
+    font-size: .8rem; color: var(--muted); line-height: 1.4;
+    padding-top: .4rem; border-top: 1px solid rgba(255,255,255,.05);
+  }
+  .exercise-item-tip::before { content: '⚡ '; }
+
+  /* add exercise form */
+  .add-exercise-form {
+    background: var(--surface3); border: 1px dashed rgba(255,77,28,.2);
+    border-radius: 10px; padding: 1.1rem; margin-top: .5rem;
+    display: none; flex-direction: column; gap: .75rem;
+  }
+  .add-exercise-form.open { display: flex; }
+  .add-exercise-form .field-row { grid-template-columns: 1fr 1fr; }
+  .form-actions { display: flex; gap: .5rem; justify-content: flex-end; }
+  .btn-sm {
+    font-family: 'Bebas Neue', sans-serif; letter-spacing: .1em;
+    border: none; cursor: pointer; transition: all .15s;
+    border-radius: 7px; padding: .55rem 1.2rem; font-size: .9rem;
+  }
+  .btn-sm-primary { background: var(--work); color: white; }
+  .btn-sm-primary:hover { box-shadow: 0 4px 16px rgba(255,77,28,.3); }
+  .btn-sm-ghost {
+    background: var(--surface2); color: var(--muted);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+  .btn-sm-ghost:hover { color: var(--text); }
+
+  .editor-footer {
+    padding: 1.25rem 1.75rem; border-top: 1px solid rgba(255,255,255,.05);
+    display: flex; gap: .75rem; justify-content: flex-end; flex-shrink: 0;
+  }
+
+  /* ── SETUP SCREEN ─────────────────────────────────────── */
+  #setup-screen {
+    position: relative;
+  }
+  #setup-screen::before {
+    content: ''; position: fixed; inset: 0;
+    background:
       radial-gradient(ellipse 70% 50% at 80% 20%, rgba(255,77,28,.12) 0%, transparent 60%),
       radial-gradient(ellipse 50% 60% at 10% 80%, rgba(0,201,167,.06) 0%, transparent 60%);
     pointer-events: none;
   }
 
-  .setup-logo {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.5rem, 8vw, 5rem);
-    letter-spacing: .08em;
-    text-align: center;
-    line-height: 1;
-    margin-bottom: .25rem;
-  }
-  .setup-logo span { color: var(--work); }
-
-  .setup-sub {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem;
-    font-weight: 300;
-    letter-spacing: .25em;
-    color: var(--muted);
-    text-align: center;
-    text-transform: uppercase;
-    margin-bottom: 3rem;
+  .setup-content {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 2rem; position: relative;
   }
 
   .setup-card {
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 16px;
-    padding: 2.5rem 3rem;
-    width: 100%;
-    max-width: 460px;
+    background: var(--surface); border: 1px solid rgba(255,255,255,.06);
+    border-radius: 16px; padding: 2.5rem 3rem; width: 100%; max-width: 460px;
     position: relative;
   }
-
   .setup-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 10%; right: 10%;
-    height: 1px;
+    content: ''; position: absolute; top: 0; left: 10%; right: 10%; height: 1px;
     background: linear-gradient(90deg, transparent, var(--work), transparent);
     border-radius: 50%;
   }
-
+  .setup-card-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.6rem; letter-spacing: .06em; margin-bottom: .25rem;
+  }
+  .setup-card-sub {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .8rem; color: var(--muted); letter-spacing: .1em;
+    text-transform: uppercase; margin-bottom: 2rem;
+  }
   .setup-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .8rem;
-    font-weight: 600;
-    letter-spacing: .2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: .75rem;
+    font-size: .8rem; font-weight: 600; letter-spacing: .2em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: .75rem;
   }
-
   .series-control {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2rem;
+    display: flex; align-items: center; gap: 1.5rem; margin-bottom: .75rem;
   }
-
   .series-btn {
-    width: 52px; height: 52px;
-    border-radius: 50%;
-    border: 2px solid rgba(255,255,255,.12);
-    background: var(--surface2);
-    color: var(--text);
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all .2s;
+    width: 52px; height: 52px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,.12); background: var(--surface2);
+    color: var(--text); font-size: 1.5rem; cursor: pointer; transition: all .2s;
     display: grid; place-items: center;
   }
   .series-btn:hover { border-color: var(--work); color: var(--work); }
-
   .series-display {
-    flex: 1;
-    text-align: center;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 4rem;
-    letter-spacing: .04em;
-    color: var(--work);
-    line-height: 1;
+    flex: 1; text-align: center; font-family: 'Bebas Neue', sans-serif;
+    font-size: 4rem; letter-spacing: .04em; color: var(--work); line-height: 1;
   }
-
   .series-hint {
-    text-align: center;
-    font-size: .8rem;
-    color: var(--muted);
-    margin-bottom: 2.5rem;
+    text-align: center; font-size: .8rem; color: var(--muted); margin-bottom: 2rem;
   }
-
   .exercise-preview {
-    background: var(--surface2);
-    border-radius: 10px;
-    padding: 1.25rem;
-    margin-bottom: 2rem;
+    background: var(--surface2); border-radius: 10px; padding: 1.25rem; margin-bottom: 2rem;
   }
-
   .preview-header {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .75rem;
-    letter-spacing: .2em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: .75rem;
+    font-size: .75rem; letter-spacing: .2em; color: var(--muted);
+    text-transform: uppercase; margin-bottom: .75rem;
   }
-
   .preview-list {
-    list-style: none;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: .35rem;
+    list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: .35rem;
   }
-
   .preview-list li {
-    font-size: .78rem;
-    color: rgba(240,238,232,.6);
-    display: flex;
-    align-items: center;
-    gap: .4rem;
+    font-size: .78rem; color: rgba(240,238,232,.6);
+    display: flex; align-items: center; gap: .4rem;
   }
-
   .preview-list li::before {
-    content: '';
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: var(--work);
-    flex-shrink: 0;
+    content: ''; width: 4px; height: 4px; border-radius: 50%;
+    background: var(--work); flex-shrink: 0;
   }
-
   .start-btn {
-    width: 100%;
-    padding: 1.1rem;
-    border: none;
-    border-radius: 10px;
-    background: var(--work);
-    color: white;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: .15em;
-    cursor: pointer;
-    transition: all .2s;
-    position: relative;
-    overflow: hidden;
+    width: 100%; padding: 1.1rem; border: none; border-radius: 10px;
+    background: var(--work); color: white;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: .15em;
+    cursor: pointer; transition: all .2s; position: relative; overflow: hidden;
   }
-
   .start-btn::after {
-    content: '';
-    position: absolute;
-    inset: 0;
+    content: ''; position: absolute; inset: 0;
     background: linear-gradient(135deg, rgba(255,255,255,.15) 0%, transparent 60%);
     pointer-events: none;
   }
-
   .start-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,77,28,.4); }
-  .start-btn:active { transform: none; }
 
-  /* ── TIMER SCREEN ───────────────────────────────────── */
-  #timer-screen {
-    display: none;
-    min-height: 100vh;
-    flex-direction: column;
-    position: relative;
-  }
-
-  #timer-screen.active { display: flex; }
-
+  /* ── TIMER SCREEN ─────────────────────────────────────── */
+  #timer-screen { position: relative; }
   #timer-screen::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: 
-      radial-gradient(ellipse 60% 40% at 50% 0%, var(--phase-glow, rgba(255,77,28,.1)) 0%, transparent 70%);
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, var(--phase-glow, rgba(255,77,28,.1)) 0%, transparent 70%);
     pointer-events: none;
-    transition: --phase-glow 1s;
   }
 
-  /* top bar */
-  .top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 1.25rem 1.75rem;
-    border-bottom: 1px solid rgba(255,255,255,.05);
-    flex-shrink: 0;
-  }
-
-  .top-bar-brand {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
-    letter-spacing: .1em;
-    color: var(--muted);
-  }
-  .top-bar-brand span { color: var(--work); }
-
-  .series-badge {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: .85rem;
-    font-weight: 600;
-    letter-spacing: .12em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-  .series-badge strong {
-    font-size: 1.1rem;
-    color: var(--text);
-  }
-
-  .exit-btn {
-    background: none;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 6px;
-    color: var(--muted);
-    padding: .35rem .75rem;
-    font-size: .75rem;
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .exit-btn:hover { border-color: var(--work); color: var(--work); }
-
-  /* main area */
   .main-area {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1.5rem 1.75rem;
-    gap: 1.5rem;
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 1.5rem 1.75rem; gap: 1.5rem;
   }
 
-  /* phase label */
   .phase-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .85rem;
-    font-weight: 600;
-    letter-spacing: .3em;
-    text-transform: uppercase;
-    padding: .35rem 1.2rem;
-    border-radius: 100px;
-    background: rgba(255,77,28,.12);
-    color: var(--work);
-    transition: all .3s;
+    font-size: .85rem; font-weight: 600; letter-spacing: .3em;
+    text-transform: uppercase; padding: .35rem 1.2rem; border-radius: 100px;
+    background: rgba(255,77,28,.12); color: var(--work); transition: all .3s;
   }
-  .phase-label.rest-mode {
-    background: rgba(0,201,167,.12);
-    color: var(--rest);
-  }
+  .phase-label.rest-mode { background: rgba(0,201,167,.12); color: var(--rest); }
 
-  /* ring */
   .ring-wrap {
-    position: relative;
-    width: min(260px, 60vw);
-    height: min(260px, 60vw);
-    flex-shrink: 0;
+    position: relative; width: min(260px, 60vw); height: min(260px, 60vw); flex-shrink: 0;
   }
-
-  .ring-svg {
-    width: 100%; height: 100%;
-    transform: rotate(-90deg);
-  }
-
-  .ring-bg {
-    fill: none;
-    stroke: rgba(255,255,255,.05);
-    stroke-width: 8;
-  }
-
+  .ring-svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: rgba(255,255,255,.05); stroke-width: 8; }
   .ring-progress {
-    fill: none;
-    stroke: var(--work);
-    stroke-width: 8;
-    stroke-linecap: round;
+    fill: none; stroke: var(--work); stroke-width: 8; stroke-linecap: round;
     transition: stroke-dashoffset .8s linear, stroke .3s;
   }
-
   .ring-glow {
-    fill: none;
-    stroke-width: 10;
-    stroke-linecap: round;
+    fill: none; stroke-width: 10; stroke-linecap: round;
     transition: stroke-dashoffset .8s linear, stroke .3s;
-    opacity: .45;
-    filter: url(#glow-blur);
+    opacity: .45; filter: url(#glow-blur);
   }
-
   .ring-center {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: .1rem;
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: .1rem;
   }
-
   .ring-time {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3.5rem, 12vw, 5.5rem);
-    letter-spacing: .04em;
-    line-height: 1;
-    transition: color .3s;
+    font-size: clamp(3.5rem, 12vw, 5.5rem); letter-spacing: .04em; line-height: 1; transition: color .3s;
   }
-
   .ring-sub {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .75rem;
-    font-weight: 600;
-    letter-spacing: .2em;
-    color: var(--muted);
-    text-transform: uppercase;
+    font-size: .75rem; font-weight: 600; letter-spacing: .2em; color: var(--muted); text-transform: uppercase;
   }
 
-  /* exercise card */
   .exercise-card {
-    width: 100%;
-    max-width: 600px;
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 14px;
-    padding: 1.5rem;
-    position: relative;
-    overflow: hidden;
+    width: 100%; max-width: 600px; background: var(--surface);
+    border: 1px solid rgba(255,255,255,.06); border-radius: 14px;
+    padding: 1.5rem; position: relative; overflow: hidden;
   }
-
   .exercise-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 3px;
-    background: var(--work);
-    transition: background .3s;
-    border-radius: 3px 0 0 3px;
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+    width: 3px; background: var(--work); transition: background .3s; border-radius: 3px 0 0 3px;
   }
   .exercise-card.rest-mode::before { background: var(--rest); }
-
   .ex-number {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: .9rem;
-    letter-spacing: .12em;
-    color: var(--muted);
-    margin-bottom: .3rem;
+    font-family: 'Bebas Neue', sans-serif; font-size: .9rem; letter-spacing: .12em;
+    color: var(--muted); margin-bottom: .3rem;
   }
-
   .ex-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(1.6rem, 5vw, 2.2rem);
-    letter-spacing: .04em;
-    line-height: 1;
-    margin-bottom: .2rem;
+    font-size: clamp(1.6rem, 5vw, 2.2rem); letter-spacing: .04em; line-height: 1; margin-bottom: .2rem;
   }
-
   .ex-name-pt {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .85rem;
-    font-weight: 400;
-    letter-spacing: .08em;
-    color: var(--muted);
-    margin-bottom: .6rem;
-    text-transform: uppercase;
+    font-size: .85rem; font-weight: 400; letter-spacing: .08em;
+    color: var(--muted); margin-bottom: .6rem; text-transform: uppercase;
   }
-
-  .ex-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: .4rem;
-    margin-bottom: .85rem;
-  }
-
+  .ex-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .85rem; }
   .tag {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .7rem;
-    font-weight: 600;
-    letter-spacing: .12em;
-    text-transform: uppercase;
-    padding: .2rem .6rem;
-    border-radius: 4px;
-    background: rgba(255,255,255,.06);
-    color: rgba(240,238,232,.6);
+    font-size: .7rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase;
+    padding: .2rem .6rem; border-radius: 4px;
+    background: rgba(255,255,255,.06); color: rgba(240,238,232,.6);
   }
-
   .ex-tip {
-    font-size: .85rem;
-    color: rgba(240,238,232,.55);
-    line-height: 1.5;
-    border-top: 1px solid rgba(255,255,255,.05);
-    padding-top: .75rem;
-    display: flex;
-    align-items: flex-start;
-    gap: .5rem;
+    font-size: .85rem; color: rgba(240,238,232,.55); line-height: 1.5;
+    border-top: 1px solid rgba(255,255,255,.05); padding-top: .75rem;
+    display: flex; align-items: flex-start; gap: .5rem;
   }
   .ex-tip::before { content: '⚡'; font-size: .75rem; flex-shrink: 0; margin-top: .1rem; }
-
   .level-badge {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
+    position: absolute; top: 1.25rem; right: 1.25rem;
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .7rem;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    padding: .2rem .6rem;
-    border-radius: 4px;
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    padding: .2rem .6rem; border-radius: 4px;
   }
   .level-badge.avancado { background: rgba(255,77,28,.15); color: var(--advanced); }
   .level-badge.intermediario { background: rgba(255,154,60,.15); color: var(--intermediate); }
   .level-badge.iniciante { background: rgba(0,201,167,.15); color: var(--beginner); }
 
-  /* next exercise preview */
   .next-preview {
-    width: 100%;
-    max-width: 600px;
-    background: var(--surface2);
-    border-radius: 10px;
-    padding: .9rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    opacity: .7;
+    width: 100%; max-width: 600px; background: var(--surface2);
+    border-radius: 10px; padding: .9rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem; opacity: .7;
   }
-
   .next-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: .7rem;
-    font-weight: 600;
-    letter-spacing: .18em;
-    color: var(--muted);
-    text-transform: uppercase;
-    white-space: nowrap;
+    font-size: .7rem; font-weight: 600; letter-spacing: .18em;
+    color: var(--muted); text-transform: uppercase; white-space: nowrap;
   }
-
   .next-name {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: .04em;
-    color: rgba(240,238,232,.7);
+    font-size: 1rem; font-weight: 700; letter-spacing: .04em; color: rgba(240,238,232,.7);
   }
 
-  /* progress bar */
   .progress-bar-wrap {
-    width: 100%;
-    max-width: 600px;
-    background: rgba(255,255,255,.05);
-    border-radius: 100px;
-    height: 4px;
-    overflow: hidden;
+    width: 100%; max-width: 600px; background: rgba(255,255,255,.05);
+    border-radius: 100px; height: 4px; overflow: hidden;
   }
-
   .progress-bar-fill {
-    height: 100%;
-    background: var(--work);
-    border-radius: 100px;
-    transition: width .5s ease, background .3s;
+    height: 100%; background: var(--work); border-radius: 100px; transition: width .5s ease, background .3s;
   }
 
-  /* controls */
   .controls {
-    display: flex;
-    gap: 1rem;
-    padding: 1.25rem 1.75rem;
-    border-top: 1px solid rgba(255,255,255,.05);
-    justify-content: center;
-    flex-shrink: 0;
+    display: flex; gap: 1rem; padding: 1.25rem 1.75rem;
+    border-top: 1px solid rgba(255,255,255,.05); justify-content: center; flex-shrink: 0;
   }
-
   .ctrl-btn {
-    padding: .8rem 2.5rem;
-    border-radius: 10px;
-    border: none;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: .12em;
-    cursor: pointer;
-    transition: all .2s;
+    padding: .8rem 2.5rem; border-radius: 10px; border: none;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: .12em; cursor: pointer; transition: all .2s;
   }
-
-  .ctrl-btn.primary {
-    background: var(--work);
-    color: white;
-  }
+  .ctrl-btn.primary { background: var(--work); color: white; }
   .ctrl-btn.primary:hover { box-shadow: 0 6px 24px rgba(255,77,28,.4); transform: translateY(-1px); }
-
   .ctrl-btn.secondary {
-    background: var(--surface2);
-    color: var(--text);
-    border: 1px solid rgba(255,255,255,.08);
+    background: var(--surface2); color: var(--text); border: 1px solid rgba(255,255,255,.08);
   }
   .ctrl-btn.secondary:hover { border-color: rgba(255,255,255,.2); }
 
-  /* done screen */
+  /* ── DONE SCREEN ─────────────────────────────────────── */
   #done-screen {
-    display: none;
-    min-height: 100vh;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 2rem;
-    position: relative;
+    min-height: 100vh; flex-direction: column; align-items: center;
+    justify-content: center; text-align: center; padding: 2rem; position: relative;
   }
-  #done-screen.active { display: flex; }
   #done-screen::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0;
     background: radial-gradient(ellipse 70% 60% at 50% 40%, rgba(0,201,167,.08) 0%, transparent 70%);
     pointer-events: none;
   }
-
   .done-icon { font-size: 4rem; margin-bottom: 1rem; }
   .done-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(2.5rem, 8vw, 4.5rem);
-    letter-spacing: .06em;
-    color: var(--rest);
-    line-height: 1;
-    margin-bottom: .5rem;
+    font-size: clamp(2.5rem, 8vw, 4.5rem); letter-spacing: .06em; color: var(--rest); line-height: 1; margin-bottom: .5rem;
   }
-  .done-sub {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 1.1rem;
-    color: var(--muted);
-    letter-spacing: .1em;
-    margin-bottom: 2.5rem;
-  }
-
-  .stats-row {
-    display: flex;
-    gap: 2rem;
-    margin-bottom: 2.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .stat-box {
-    background: var(--surface);
-    border: 1px solid rgba(255,255,255,.06);
-    border-radius: 12px;
-    padding: 1.25rem 2rem;
-    min-width: 120px;
-  }
-  .stat-val {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.5rem;
-    color: var(--rest);
-  }
-  .stat-key {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: .75rem;
-    letter-spacing: .15em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
-
+  .done-sub { font-family: 'Barlow Condensed', sans-serif; font-size: 1.1rem; color: var(--muted); letter-spacing: .1em; margin-bottom: 2.5rem; }
+  .stats-row { display: flex; gap: 2rem; margin-bottom: 2.5rem; flex-wrap: wrap; justify-content: center; }
+  .stat-box { background: var(--surface); border: 1px solid rgba(255,255,255,.06); border-radius: 12px; padding: 1.25rem 2rem; min-width: 120px; }
+  .stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--rest); }
+  .stat-key { font-family: 'Barlow Condensed', sans-serif; font-size: .75rem; letter-spacing: .15em; color: var(--muted); text-transform: uppercase; }
   .restart-btn {
-    padding: 1rem 3rem;
-    border: none;
-    border-radius: 10px;
-    background: var(--rest);
-    color: #0A0A0F;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.3rem;
-    letter-spacing: .12em;
-    cursor: pointer;
-    transition: all .2s;
+    padding: 1rem 3rem; border: none; border-radius: 10px; background: var(--rest); color: #0A0A0F;
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: .12em; cursor: pointer; transition: all .2s;
   }
   .restart-btn:hover { box-shadow: 0 6px 24px rgba(0,201,167,.35); transform: translateY(-2px); }
 
-  /* transitions */
-  .fade-in {
-    animation: fadeIn .4s ease forwards;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  .fade-in { animation: fadeIn .4s ease forwards; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-  .pulse {
-    animation: pulse .15s ease;
+  /* ── SERIES BADGE ────────────────────────────────────── */
+  .series-badge { font-family: 'Barlow Condensed', sans-serif; font-size: .85rem; font-weight: 600; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; }
+  .series-badge strong { font-size: 1.1rem; color: var(--text); }
+
+  /* ── MODAL ───────────────────────────────────────────── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.7); z-index: 100;
+    align-items: center; justify-content: center; padding: 1.5rem;
   }
-  @keyframes pulse {
-    0%   { transform: scale(1); }
-    50%  { transform: scale(1.04); }
-    100% { transform: scale(1); }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid rgba(255,255,255,.1);
+    border-radius: 16px; padding: 2rem; width: 100%; max-width: 420px;
+    position: relative;
   }
+  .modal-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: .04em; margin-bottom: .5rem;
+  }
+  .modal-sub { font-size: .9rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.5; }
+  .modal-actions { display: flex; gap: .75rem; justify-content: flex-end; margin-top: 1.5rem; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
 </style>
 </head>
 <body>
 
-<!-- ══ SETUP SCREEN ═══════════════════════════════════════ -->
-<div id="setup-screen">
-  <div class="setup-logo">KB <span>Full Body</span></div>
-  <div class="setup-sub">16kg · HIIT · 45 trabalho / 20s descanso</div>
-
-  <div class="setup-card">
-    <div class="setup-label">Número de séries</div>
-    <div class="series-control">
-      <button class="series-btn" onclick="changeSeries(-1)">−</button>
-      <div class="series-display" id="series-val">2</div>
-      <button class="series-btn" onclick="changeSeries(+1)">+</button>
+<!-- ══ HOME SCREEN ════════════════════════════════════════ -->
+<div id="home-screen" class="screen active">
+  <div class="top-bar">
+    <div class="top-bar-brand">Treino <span>App</span></div>
+    <div class="top-bar-nav">
+      <button class="btn-ghost" onclick="showScreen('fichas-screen')">📋 Fichas</button>
     </div>
-    <div class="series-hint" id="series-hint">2 séries · 10 exercícios · ~20 min</div>
+  </div>
+  <div class="home-content">
+    <div class="home-title">Seu <span>Treino</span><br>de Hoje</div>
+    <div class="home-sub">Selecione uma ficha e comece</div>
 
-    <div class="exercise-preview">
-      <div class="preview-header">Exercícios incluídos</div>
-      <ul class="preview-list">
-        <li>Hand-to-Hand Swing</li>
-        <li>Alternate Back Lunge</li>
-        <li>Strict Press R/L</li>
-        <li>Bent-Over Row R/L</li>
-        <li>Offset Push-Up R/L</li>
-        <li>Goblet Squat</li>
-        <li>Single Leg RDL R/L</li>
-        <li>Swing Clean R/L</li>
-        <li>Goblet Curl</li>
-        <li>Crush Push-Ups</li>
-      </ul>
+    <div id="active-banner-wrap" style="width:100%;max-width:520px;"></div>
+
+    <div class="home-actions">
+      <button class="btn btn-secondary" onclick="showScreen('fichas-screen')">📋 Gerenciar Fichas</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FICHAS LIST SCREEN ══════════════════════════════════ -->
+<div id="fichas-screen" class="screen">
+  <div class="top-bar">
+    <button class="btn-ghost" onclick="showScreen('home-screen')">← Voltar</button>
+    <div class="top-bar-brand">Fichas de <span>Treino</span></div>
+    <button class="btn-ghost" onclick="openNewFicha()">+ Nova</button>
+  </div>
+  <div class="fichas-content">
+    <div class="fichas-header">
+      <div class="fichas-title">Minhas Fichas</div>
+      <button class="btn btn-primary" onclick="openNewFicha()" style="font-size:.9rem;padding:.65rem 1.25rem;">+ Nova Ficha</button>
+    </div>
+    <div id="fichas-list"></div>
+  </div>
+</div>
+
+<!-- ══ EDITOR SCREEN ══════════════════════════════════════ -->
+<div id="editor-screen" class="screen">
+  <div class="top-bar">
+    <button class="btn-ghost" onclick="showScreen('fichas-screen')">← Cancelar</button>
+    <div class="top-bar-brand" id="editor-screen-title">Nova <span>Ficha</span></div>
+    <div></div>
+  </div>
+  <div class="editor-content">
+    <input type="hidden" id="editor-id">
+
+    <div>
+      <div class="field-label">Nome da Ficha</div>
+      <input class="field-input" id="editor-name" type="text" placeholder="Ex: Treino A – Full Body, Push Day...">
     </div>
 
-    <button class="start-btn" onclick="startWorkout()">🔥 INICIAR TREINO</button>
+    <div class="field-row">
+      <div>
+        <div class="field-label">Tempo de Trabalho (s)</div>
+        <input class="field-input" id="editor-work-time" type="number" min="5" max="300" value="45">
+      </div>
+      <div>
+        <div class="field-label">Tempo de Descanso (s)</div>
+        <input class="field-input" id="editor-rest-time" type="number" min="5" max="300" value="20">
+      </div>
+    </div>
+
+    <div class="exercises-section">
+      <div class="exercises-section-header">
+        <div class="exercises-section-title">Exercícios (<span id="ex-count">0</span>)</div>
+        <button class="btn-icon" onclick="toggleAddForm()">+ Adicionar</button>
+      </div>
+
+      <div id="add-exercise-form" class="add-exercise-form">
+        <div>
+          <div class="field-label">Nome do Exercício</div>
+          <input class="field-input" id="new-ex-name" type="text" placeholder="Ex: Goblet Squat">
+        </div>
+        <div>
+          <div class="field-label">Nome em Português (opcional)</div>
+          <input class="field-input" id="new-ex-name-pt" type="text" placeholder="Ex: Agachamento Goblet">
+        </div>
+        <div class="field-row">
+          <div>
+            <div class="field-label">Nível</div>
+            <select class="field-select" id="new-ex-level">
+              <option value="Iniciante">Iniciante</option>
+              <option value="Intermediário" selected>Intermediário</option>
+              <option value="Avançado">Avançado</option>
+            </select>
+          </div>
+          <div>
+            <div class="field-label">Músculos (separar por vírgula)</div>
+            <input class="field-input" id="new-ex-muscles" type="text" placeholder="Ex: Core, Glúteos">
+          </div>
+        </div>
+        <div>
+          <div class="field-label">Dica de Execução (opcional)</div>
+          <input class="field-input" id="new-ex-tip" type="text" placeholder="Ex: Joelhos para fora, peito erguido">
+        </div>
+        <div class="form-actions">
+          <button class="btn-sm btn-sm-ghost" onclick="toggleAddForm()">Cancelar</button>
+          <button class="btn-sm btn-sm-primary" onclick="addExerciseToEditor()">Adicionar</button>
+        </div>
+      </div>
+
+      <div id="editor-exercises-list" style="margin-top:.5rem;"></div>
+      <div id="no-exercises-msg" style="text-align:center;padding:1.5rem;color:var(--muted);font-size:.85rem;">
+        Nenhum exercício adicionado ainda. Clique em "+ Adicionar".
+      </div>
+    </div>
+  </div>
+  <div class="editor-footer">
+    <button class="btn btn-secondary" onclick="showScreen('fichas-screen')">Cancelar</button>
+    <button class="btn btn-primary" onclick="saveFicha()">💾 Salvar Ficha</button>
+  </div>
+</div>
+
+<!-- ══ SETUP SCREEN ════════════════════════════════════════ -->
+<div id="setup-screen" class="screen">
+  <div class="top-bar">
+    <button class="btn-ghost" onclick="showScreen('home-screen')">← Voltar</button>
+    <div class="top-bar-brand" id="setup-brand">KB <span>Full Body</span></div>
+    <div></div>
+  </div>
+  <div class="setup-content">
+    <div class="setup-card">
+      <div class="setup-card-title" id="setup-ficha-name">Treino</div>
+      <div class="setup-card-sub" id="setup-ficha-sub">45s trabalho / 20s descanso</div>
+      <div class="setup-label">Número de Séries</div>
+      <div class="series-control">
+        <button class="series-btn" onclick="changeSeries(-1)">−</button>
+        <div class="series-display" id="series-val">2</div>
+        <button class="series-btn" onclick="changeSeries(+1)">+</button>
+      </div>
+      <div class="series-hint" id="series-hint">2 séries · ~20 min</div>
+      <div class="exercise-preview">
+        <div class="preview-header">Exercícios</div>
+        <ul class="preview-list" id="setup-preview-list"></ul>
+      </div>
+      <button class="start-btn" onclick="startWorkout()">🔥 INICIAR TREINO</button>
+    </div>
   </div>
 </div>
 
 <!-- ══ TIMER SCREEN ════════════════════════════════════════ -->
-<div id="timer-screen">
+<div id="timer-screen" class="screen">
   <div class="top-bar">
-    <div class="top-bar-brand">KB <span>Full Body</span></div>
+    <div class="top-bar-brand" id="timer-brand">KB <span>Full Body</span></div>
     <div class="series-badge">Série <strong id="cur-series">1</strong>/<span id="tot-series">2</span></div>
-    <button class="exit-btn" onclick="exitWorkout()">✕ Sair</button>
+    <button class="btn-ghost" onclick="exitWorkout()">✕ Sair</button>
   </div>
-
   <div class="main-area">
     <div class="phase-label" id="phase-label">TRABALHO</div>
-
     <div class="ring-wrap">
       <svg class="ring-svg" viewBox="0 0 100 100">
         <defs>
@@ -691,410 +778,533 @@
           </filter>
         </defs>
         <circle class="ring-bg" cx="50" cy="50" r="44"/>
-        <circle class="ring-glow" id="ring-glow" cx="50" cy="50" r="44"
-          stroke-dasharray="276.46" stroke-dashoffset="0"/>
-        <circle class="ring-progress" id="ring" cx="50" cy="50" r="44"
-          stroke-dasharray="276.46" stroke-dashoffset="0"/>
+        <circle class="ring-glow" id="ring-glow" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="0"/>
+        <circle class="ring-progress" id="ring" cx="50" cy="50" r="44" stroke-dasharray="276.46" stroke-dashoffset="0"/>
       </svg>
       <div class="ring-center">
         <div class="ring-time" id="ring-time">45</div>
         <div class="ring-sub" id="ring-sub">segundos</div>
       </div>
     </div>
-
     <div class="exercise-card" id="ex-card">
-      <div class="ex-number" id="ex-number">EXERCÍCIO 1 DE 10</div>
-      <div class="ex-name" id="ex-name">Hand-to-Hand Swing</div>
-      <div class="ex-name-pt" id="ex-name-pt">Swing de Mão em Mão</div>
+      <div class="ex-number" id="ex-number">EXERCÍCIO 1</div>
+      <div class="ex-name" id="ex-name"></div>
+      <div class="ex-name-pt" id="ex-name-pt"></div>
       <div class="ex-tags" id="ex-tags"></div>
       <div class="ex-tip" id="ex-tip"></div>
       <div class="level-badge" id="level-badge"></div>
     </div>
-
     <div class="progress-bar-wrap">
       <div class="progress-bar-fill" id="overall-bar" style="width:0%"></div>
     </div>
-
     <div class="next-preview" id="next-preview">
       <div class="next-label">A seguir →</div>
-      <div class="next-name" id="next-name">Alternate Back Lunge</div>
+      <div class="next-name" id="next-name"></div>
     </div>
   </div>
-
   <div class="controls">
     <button class="ctrl-btn secondary" id="pause-btn" onclick="togglePause()">⏸ PAUSAR</button>
     <button class="ctrl-btn secondary" onclick="skipPhase()">⏭ PULAR</button>
   </div>
 </div>
 
-<!-- ══ DONE SCREEN ════════════════════════════════════════ -->
-<div id="done-screen">
+<!-- ══ DONE SCREEN ═════════════════════════════════════════ -->
+<div id="done-screen" class="screen">
   <div class="done-icon">🏆</div>
   <div class="done-title">Treino Concluído!</div>
   <div class="done-sub" id="done-sub">Você arrasou. Descanse bem.</div>
   <div class="stats-row">
-    <div class="stat-box">
-      <div class="stat-val" id="stat-series">2</div>
-      <div class="stat-key">Séries</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-val">10</div>
-      <div class="stat-key">Exercícios</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-val" id="stat-time">20</div>
-      <div class="stat-key">Minutos</div>
+    <div class="stat-box"><div class="stat-val" id="stat-series">2</div><div class="stat-key">Séries</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-exercises">10</div><div class="stat-key">Exercícios</div></div>
+    <div class="stat-box"><div class="stat-val" id="stat-time">20</div><div class="stat-key">Minutos</div></div>
+  </div>
+  <button class="restart-btn" onclick="returnHome()">↩ Início</button>
+</div>
+
+<!-- ══ DELETE MODAL ════════════════════════════════════════ -->
+<div id="delete-modal" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-title">Excluir Ficha</div>
+    <div class="modal-sub" id="delete-modal-msg">Tem certeza que deseja excluir esta ficha? Esta ação não pode ser desfeita.</div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" style="font-size:.9rem;padding:.65rem 1.25rem;" onclick="closeDeleteModal()">Cancelar</button>
+      <button class="btn btn-primary" style="font-size:.9rem;padding:.65rem 1.25rem;background:var(--work);" onclick="confirmDelete()">Excluir</button>
     </div>
   </div>
-  <button class="restart-btn" onclick="resetToSetup()">↩ NOVO TREINO</button>
 </div>
 
 <script>
-// ── DATA ─────────────────────────────────────────────────
-const EXERCISES = [
-  { name: "Hand-to-Hand Swing",  namePT: "Swing de Mão em Mão",         muscles: ["Core","Glúteos","Post. Coxa","Grip"],   tip: "Core contraído, quadril como motor",           level: "Avançado"      },
-  { name: "Alternate Back Lunge",namePT: "Avanço Alternado para Trás",   muscles: ["Glúteos","Quadríceps","Equilíbrio"],    tip: "Joelho traseiro quase no chão",                 level: "Intermediário" },
-  { name: "Strict Press R/L",    namePT: "Desenvolvimento Estrito D/E",  muscles: ["Deltoides","Tríceps","Core"],           tip: "Não arquear lombar, core ativo",                level: "Intermediário" },
-  { name: "Bent-Over Row R/L",   namePT: "Remada Curvada D/E",           muscles: ["Dorsais","Bíceps","Postura"],           tip: "Cotovelo puxando para trás, não para cima",     level: "Intermediário" },
-  { name: "Offset Push-Up R/L",  namePT: "Flexão com KB Alternado D/E",  muscles: ["Peito","Ombros","Core"],                tip: "Mão no KB, corpo alinhado",                     level: "Avançado"      },
-  { name: "Goblet Squat",        namePT: "Agachamento Goblet",           muscles: ["Quadríceps","Glúteos","Core"],          tip: "Joelhos para fora, peito erguido",              level: "Iniciante"     },
-  { name: "Single Leg RDL R/L",  namePT: "Levantamento Terra Unilateral",muscles: ["Isquiotibiais","Glúteos","Equilíbrio"],tip: "Quadril dobra, não a lombar",                   level: "Intermediário" },
-  { name: "Swing Clean R/L",     namePT: "Swing com Limpeza D/E",        muscles: ["Potência","Grip","Full Body"],          tip: "Cotovelo guia o KB, não jogue",                 level: "Avançado"      },
-  { name: "Goblet Curl",         namePT: "Rosca Goblet",                 muscles: ["Bíceps","Grip","Core"],                 tip: "Segurar KB pelos lados, cotovelos fixos",       level: "Iniciante"     },
-  { name: "Crush Push-Ups",      namePT: "Flexão com Compressão",        muscles: ["Peito","Tríceps","Ombros"],             tip: "Apertar o KB o tempo todo para ativar",         level: "Intermediário" },
-];
+// ── STORAGE ────────────────────────────────────────────────
+const STORAGE_KEY = 'treino_app_v1';
 
-const WORK_TIME = 45;
-const REST_TIME = 20;
-const CIRC = 276.46; // 2π * 44
-
-// ── AUDIO ────────────────────────────────────────────────
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let actx = null;
-
-function getACtx() {
-  if (!actx) actx = new AudioCtx();
-  return actx;
-}
-
-// ── Low-level helpers ─────────────────────────────────────
-
-// Noise burst (white noise shaped by a gain envelope)
-function noise(dur, vol, t0) {
+function loadData() {
   try {
-    const ctx = getACtx();
-    const bufSize = ctx.sampleRate * dur;
-    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
-    const data = buf.getChannelData(0);
-    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
-    const src = ctx.createBufferSource();
-    src.buffer = buf;
-    const gain = ctx.createGain();
-    src.connect(gain); gain.connect(ctx.destination);
-    gain.gain.setValueAtTime(vol, ctx.currentTime + t0);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + dur);
-    src.start(ctx.currentTime + t0);
-    src.stop(ctx.currentTime + t0 + dur + 0.02);
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
   } catch(e) {}
+  return { fichas: getDefaultFichas(), activeFichaId: null };
 }
 
-// Oscillator with envelope
-function osc(freq, type, vol, attack, decay, t0, sweep) {
-  try {
-    const ctx = getACtx();
-    const o = ctx.createOscillator();
-    const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.type = type;
-    o.frequency.setValueAtTime(freq, ctx.currentTime + t0);
-    if (sweep) o.frequency.exponentialRampToValueAtTime(sweep, ctx.currentTime + t0 + attack + decay);
-    g.gain.setValueAtTime(0.001, ctx.currentTime + t0);
-    g.gain.linearRampToValueAtTime(vol, ctx.currentTime + t0 + attack);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + attack + decay);
-    o.start(ctx.currentTime + t0);
-    o.stop(ctx.currentTime + t0 + attack + decay + 0.05);
-  } catch(e) {}
+function saveData(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch(e) {}
 }
 
-// ─────────────────────────────────────────────────────────
-// WHISTLE — fim dos 40s de trabalho
-// Soa como apito de árbitro: chirp rápido + harmônicos
-// ─────────────────────────────────────────────────────────
-function playWorkEnd() {
-  // Corpo do apito: onda senoidal subindo depois descendo
-  osc(2200, 'sine', 0.55, 0.02, 0.18, 0,    2800);
-  osc(2800, 'sine', 0.30, 0.01, 0.12, 0.04, 2200);
-  // Ar / fricção
-  noise(0.22, 0.06, 0);
-  // Segundo apito mais curto
-  osc(2500, 'sine', 0.45, 0.01, 0.13, 0.30, 3000);
-  noise(0.15, 0.05, 0.30);
+function getDefaultFichas() {
+  return [{
+    id: 'default-kb',
+    name: 'KB Full Body',
+    workTime: 45,
+    restTime: 20,
+    exercises: [
+      { name: "Hand-to-Hand Swing",   namePT: "Swing de Mão em Mão",          muscles: ["Core","Glúteos","Post. Coxa","Grip"], tip: "Core contraído, quadril como motor",          level: "Avançado"      },
+      { name: "Alternate Back Lunge", namePT: "Avanço Alternado para Trás",    muscles: ["Glúteos","Quadríceps","Equilíbrio"],  tip: "Joelho traseiro quase no chão",               level: "Intermediário" },
+      { name: "Strict Press R/L",     namePT: "Desenvolvimento Estrito D/E",   muscles: ["Deltoides","Tríceps","Core"],         tip: "Não arquear lombar, core ativo",              level: "Intermediário" },
+      { name: "Bent-Over Row R/L",    namePT: "Remada Curvada D/E",            muscles: ["Dorsais","Bíceps","Postura"],         tip: "Cotovelo puxando para trás, não para cima",   level: "Intermediário" },
+      { name: "Offset Push-Up R/L",   namePT: "Flexão com KB Alternado D/E",   muscles: ["Peito","Ombros","Core"],              tip: "Mão no KB, corpo alinhado",                  level: "Avançado"      },
+      { name: "Goblet Squat",         namePT: "Agachamento Goblet",            muscles: ["Quadríceps","Glúteos","Core"],        tip: "Joelhos para fora, peito erguido",            level: "Iniciante"     },
+      { name: "Single Leg RDL R/L",   namePT: "Levantamento Terra Unilateral", muscles: ["Isquiotibiais","Glúteos","Equilíbrio"],tip:"Quadril dobra, não a lombar",                level: "Intermediário" },
+      { name: "Swing Clean R/L",      namePT: "Swing com Limpeza D/E",         muscles: ["Potência","Grip","Full Body"],        tip: "Cotovelo guia o KB, não jogue",              level: "Avançado"      },
+      { name: "Goblet Curl",          namePT: "Rosca Goblet",                  muscles: ["Bíceps","Grip","Core"],               tip: "Segurar KB pelos lados, cotovelos fixos",     level: "Iniciante"     },
+      { name: "Crush Push-Ups",       namePT: "Flexão com Compressão",         muscles: ["Peito","Tríceps","Ombros"],           tip: "Apertar o KB o tempo todo para ativar",       level: "Intermediário" },
+    ]
+  }];
 }
 
-// ─────────────────────────────────────────────────────────
-// BUZZER DE ACADEMIA — fim dos 20s de descanso (hora de ir!)
-// Soa como o buzzer de fim de descanso numa academia / CrossFit box
-// ─────────────────────────────────────────────────────────
-function playRestEnd() {
-  // Sub-bumpo grave (kickdrum-like) para impacto
-  osc(180, 'sine',   0.7,  0.005, 0.18, 0,    60);
-  osc(80,  'sine',   0.5,  0.001, 0.22, 0,    40);
-  // Buzzer médio-alto
-  osc(520, 'square', 0.18, 0.005, 0.06, 0,    null);
-  osc(520, 'square', 0.18, 0.005, 0.06, 0.08, null);
-  osc(520, 'square', 0.18, 0.005, 0.06, 0.16, null);
-  // Swell de energia ascendente
-  osc(300, 'sawtooth', 0.12, 0.01, 0.22, 0, 600);
+let appData = loadData();
+
+// ── SCREENS ────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
 }
 
-// ─────────────────────────────────────────────────────────
-// METRÔNOMO PESADO — últimos 3 segundos
-// Clique mecânico como timer de boxe
-// ─────────────────────────────────────────────────────────
-function playCountdown(n) {
-  // Transiente de alta frequência (o "clack")
-  osc(1200, 'square', 0.22, 0.002, 0.04, 0, 800);
-  // Body do clique (grave curto)
-  osc(160,  'sine',   0.35, 0.002, 0.06, 0, 80);
-  // Ruído de ataque
-  noise(0.04, 0.12, 0);
+// ── HOME ───────────────────────────────────────────────────
+function renderHome() {
+  const wrap = document.getElementById('active-banner-wrap');
+  const activeFicha = appData.fichas.find(f => f.id === appData.activeFichaId);
+
+  if (activeFicha) {
+    wrap.innerHTML = `
+      <div class="active-banner">
+        <div class="active-banner-left">
+          <div class="active-banner-tag">✅ Ficha Ativa</div>
+          <div class="active-banner-name">${esc(activeFicha.name)}</div>
+          <div class="active-banner-info">${activeFicha.exercises.length} exercício${activeFicha.exercises.length !== 1 ? 's' : ''} · ${activeFicha.workTime}s trabalho / ${activeFicha.restTime}s descanso</div>
+        </div>
+        <button class="active-banner-btn" onclick="goToSetup('${activeFicha.id}')">🔥 Treinar</button>
+      </div>`;
+  } else {
+    wrap.innerHTML = `
+      <div class="empty-banner">
+        <div class="empty-icon">📋</div>
+        <div class="empty-title">Nenhuma ficha ativa</div>
+        <div class="empty-sub">Vá em "Fichas" para criar ou ativar uma ficha de treino.</div>
+        <button class="btn btn-primary" onclick="showScreen('fichas-screen')" style="font-size:.9rem;padding:.7rem 1.5rem;margin-top:.25rem;">Ver Fichas</button>
+      </div>`;
+  }
 }
 
-// ─────────────────────────────────────────────────────────
-// FANFARRA DE VITÓRIA — treino concluído
-// Progressão ascendente tipo medalha de ouro
-// ─────────────────────────────────────────────────────────
-function playFinish() {
-  // Bumpo de impacto inicial
-  osc(100, 'sine', 0.6, 0.005, 0.25, 0, 50);
-  noise(0.1, 0.15, 0);
+// ── FICHAS LIST ────────────────────────────────────────────
+function renderFichasList() {
+  const list = document.getElementById('fichas-list');
+  if (appData.fichas.length === 0) {
+    list.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--muted);">
+      <div style="font-size:2.5rem;margin-bottom:.75rem;opacity:.4;">📋</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-size:1rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.5rem;">Nenhuma ficha criada</div>
+      <div style="font-size:.85rem;">Clique em "+ Nova Ficha" para começar.</div>
+    </div>`;
+    return;
+  }
 
-  // Arpejo ascendente — 5 notas com harmônicos
-  const notes = [
-    { f: 392, t: 0.10 },  // Sol
-    { f: 494, t: 0.25 },  // Si
-    { f: 587, t: 0.40 },  // Ré
-    { f: 740, t: 0.55 },  // Fá#
-    { f: 988, t: 0.70 },  // Si alto
-  ];
-  notes.forEach(({ f, t }) => {
-    osc(f,     'sine',     0.45, 0.01, 0.35, t, null);
-    osc(f * 2, 'sine',     0.12, 0.01, 0.25, t, null); // oitava
-    osc(f * 3, 'triangle', 0.05, 0.01, 0.15, t, null); // harmônico
-  });
-
-  // Nota longa de resolução
-  osc(988, 'sine', 0.5, 0.02, 0.8, 0.95, null);
-  osc(494, 'sine', 0.2, 0.02, 0.8, 0.95, null);
-
-  // Shimmer final (ruído suave)
-  noise(0.5, 0.04, 1.0);
+  list.innerHTML = appData.fichas.map(f => {
+    const isActive = f.id === appData.activeFichaId;
+    const chips = f.exercises.slice(0,6).map(e => `<span class="ficha-ex-chip">${esc(e.name)}</span>`).join('');
+    const more = f.exercises.length > 6 ? `<span class="ficha-ex-chip">+${f.exercises.length - 6}</span>` : '';
+    return `
+      <div class="ficha-card ${isActive ? 'is-active' : ''}">
+        <div class="ficha-card-header">
+          <div>
+            <div class="ficha-card-name">${esc(f.name)}</div>
+            <div class="ficha-card-meta">${f.exercises.length} exercícios · ${f.workTime}s trabalho / ${f.restTime}s descanso</div>
+          </div>
+          ${isActive ? '<div class="ficha-active-badge">✅ Ativa</div>' : ''}
+        </div>
+        <div class="ficha-card-exercises">${chips}${more}</div>
+        <div class="ficha-card-actions">
+          ${!isActive ? `<button class="btn-icon" onclick="setActiveFicha('${f.id}')">✅ Ativar</button>` : '<button class="btn-icon" style="opacity:.4;cursor:default;">✅ Ativa</button>'}
+          <button class="btn-icon" onclick="goToSetup('${f.id}')">🔥 Treinar</button>
+          <button class="btn-icon" onclick="editFicha('${f.id}')">✏️ Editar</button>
+          <button class="btn-icon btn-danger" onclick="openDeleteModal('${f.id}')">🗑️ Excluir</button>
+        </div>
+      </div>`;
+  }).join('');
 }
 
-// ── STATE ────────────────────────────────────────────────
-let totalSeries = 2;
-let curSeries   = 0;  // 0-indexed
-let curExIndex  = 0;
-let phase       = 'work'; // 'work' | 'rest'
-let timeLeft    = WORK_TIME;
-let timer       = null;
-let paused      = false;
-let startTime   = null;
+function setActiveFicha(id) {
+  appData.activeFichaId = id;
+  saveData(appData);
+  renderFichasList();
+  renderHome();
+}
 
-// ── SETUP ────────────────────────────────────────────────
+// ── EDITOR ─────────────────────────────────────────────────
+let editorExercises = [];
+
+function openNewFicha() {
+  document.getElementById('editor-id').value = '';
+  document.getElementById('editor-name').value = '';
+  document.getElementById('editor-work-time').value = '45';
+  document.getElementById('editor-rest-time').value = '20';
+  document.getElementById('editor-screen-title').innerHTML = 'Nova <span>Ficha</span>';
+  editorExercises = [];
+  renderEditorExercises();
+  closeAddForm();
+  showScreen('editor-screen');
+}
+
+function editFicha(id) {
+  const f = appData.fichas.find(f => f.id === id);
+  if (!f) return;
+  document.getElementById('editor-id').value = f.id;
+  document.getElementById('editor-name').value = f.name;
+  document.getElementById('editor-work-time').value = f.workTime;
+  document.getElementById('editor-rest-time').value = f.restTime;
+  document.getElementById('editor-screen-title').innerHTML = `Editar <span>Ficha</span>`;
+  editorExercises = f.exercises.map(e => ({...e, muscles: [...(e.muscles||[])]}));
+  renderEditorExercises();
+  closeAddForm();
+  showScreen('editor-screen');
+}
+
+function renderEditorExercises() {
+  const list = document.getElementById('editor-exercises-list');
+  const msg = document.getElementById('no-exercises-msg');
+  const count = document.getElementById('ex-count');
+  count.textContent = editorExercises.length;
+  msg.style.display = editorExercises.length ? 'none' : 'block';
+
+  list.innerHTML = editorExercises.map((ex, i) => {
+    const lvlClass = ex.level === 'Avançado' ? 'level-avancado' : ex.level === 'Iniciante' ? 'level-iniciante' : 'level-intermediario';
+    const muscleTags = (ex.muscles||[]).map(m => `<span class="detail-chip">${esc(m)}</span>`).join('');
+    return `
+      <div class="exercise-item">
+        <div class="exercise-item-header">
+          <span class="exercise-item-num">${i+1}.</span>
+          <span class="exercise-item-name">${esc(ex.name)}</span>
+          <button class="btn-icon btn-danger" onclick="removeExercise(${i})" style="padding:.3rem .6rem;font-size:.75rem;">✕</button>
+        </div>
+        <div class="exercise-item-details">
+          <span class="detail-chip ${lvlClass}">${esc(ex.level)}</span>
+          ${muscleTags}
+        </div>
+        ${ex.namePT ? `<div style="font-size:.78rem;color:var(--muted);font-family:'Barlow Condensed',sans-serif;letter-spacing:.06em;">${esc(ex.namePT)}</div>` : ''}
+        ${ex.tip ? `<div class="exercise-item-tip">${esc(ex.tip)}</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function toggleAddForm() {
+  const form = document.getElementById('add-exercise-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('new-ex-name').value = '';
+    document.getElementById('new-ex-name-pt').value = '';
+    document.getElementById('new-ex-muscles').value = '';
+    document.getElementById('new-ex-tip').value = '';
+    document.getElementById('new-ex-level').value = 'Intermediário';
+    setTimeout(() => document.getElementById('new-ex-name').focus(), 50);
+  }
+}
+function closeAddForm() { document.getElementById('add-exercise-form').classList.remove('open'); }
+
+function addExerciseToEditor() {
+  const name = document.getElementById('new-ex-name').value.trim();
+  if (!name) { document.getElementById('new-ex-name').focus(); return; }
+  const namePT  = document.getElementById('new-ex-name-pt').value.trim();
+  const level   = document.getElementById('new-ex-level').value;
+  const muscles = document.getElementById('new-ex-muscles').value.split(',').map(s => s.trim()).filter(Boolean);
+  const tip     = document.getElementById('new-ex-tip').value.trim();
+  editorExercises.push({ name, namePT, level, muscles, tip });
+  renderEditorExercises();
+  closeAddForm();
+}
+
+function removeExercise(i) {
+  editorExercises.splice(i, 1);
+  renderEditorExercises();
+}
+
+function saveFicha() {
+  const name = document.getElementById('editor-name').value.trim();
+  if (!name) { document.getElementById('editor-name').focus(); return; }
+  if (editorExercises.length === 0) { alert('Adicione pelo menos um exercício.'); return; }
+
+  const workTime = parseInt(document.getElementById('editor-work-time').value) || 45;
+  const restTime = parseInt(document.getElementById('editor-rest-time').value) || 20;
+  const id       = document.getElementById('editor-id').value;
+
+  if (id) {
+    const idx = appData.fichas.findIndex(f => f.id === id);
+    if (idx !== -1) {
+      appData.fichas[idx] = { id, name, workTime, restTime, exercises: editorExercises };
+    }
+  } else {
+    const newId = 'ficha-' + Date.now();
+    appData.fichas.push({ id: newId, name, workTime, restTime, exercises: editorExercises });
+    if (!appData.activeFichaId) appData.activeFichaId = newId;
+  }
+  saveData(appData);
+  renderFichasList();
+  renderHome();
+  showScreen('fichas-screen');
+}
+
+// ── DELETE MODAL ───────────────────────────────────────────
+let pendingDeleteId = null;
+
+function openDeleteModal(id) {
+  const f = appData.fichas.find(f => f.id === id);
+  pendingDeleteId = id;
+  document.getElementById('delete-modal-msg').textContent =
+    `Tem certeza que deseja excluir "${f ? f.name : 'esta ficha'}"? Esta ação não pode ser desfeita.`;
+  document.getElementById('delete-modal').classList.add('open');
+}
+function closeDeleteModal() {
+  pendingDeleteId = null;
+  document.getElementById('delete-modal').classList.remove('open');
+}
+function confirmDelete() {
+  if (!pendingDeleteId) return;
+  appData.fichas = appData.fichas.filter(f => f.id !== pendingDeleteId);
+  if (appData.activeFichaId === pendingDeleteId) appData.activeFichaId = null;
+  saveData(appData);
+  renderFichasList();
+  renderHome();
+  closeDeleteModal();
+}
+
+// ── SETUP ──────────────────────────────────────────────────
+let currentFicha = null;
+let totalSeries  = 2;
+
+function goToSetup(fichaId) {
+  const f = appData.fichas.find(f => f.id === fichaId);
+  if (!f) return;
+  currentFicha = f;
+  totalSeries = 2;
+  document.getElementById('setup-brand').innerHTML = esc(f.name).replace(' ', ' <span>') + '</span>';
+  document.getElementById('setup-ficha-name').textContent = f.name;
+  document.getElementById('setup-ficha-sub').textContent = `${f.workTime}s trabalho / ${f.restTime}s descanso`;
+  document.getElementById('series-val').textContent = totalSeries;
+  const mins = Math.round(totalSeries * f.exercises.length * (f.workTime + f.restTime) / 60);
+  document.getElementById('series-hint').textContent = `${totalSeries} série${totalSeries>1?'s':''} · ${f.exercises.length} exercícios · ~${mins} min`;
+  const previewList = document.getElementById('setup-preview-list');
+  previewList.innerHTML = f.exercises.map(e => `<li>${esc(e.name)}</li>`).join('');
+  showScreen('setup-screen');
+}
+
 function changeSeries(delta) {
   totalSeries = Math.max(1, Math.min(10, totalSeries + delta));
   document.getElementById('series-val').textContent = totalSeries;
-  const mins = Math.round(totalSeries * 10 * (WORK_TIME + REST_TIME) / 60);
-  document.getElementById('series-hint').textContent =
-    `${totalSeries} série${totalSeries>1?'s':''} · 10 exercícios · ~${mins} min`;
+  const f = currentFicha;
+  const mins = Math.round(totalSeries * f.exercises.length * (f.workTime + f.restTime) / 60);
+  document.getElementById('series-hint').textContent = `${totalSeries} série${totalSeries>1?'s':''} · ${f.exercises.length} exercícios · ~${mins} min`;
 }
 
+// ── TIMER ──────────────────────────────────────────────────
+const CIRC = 276.46;
+let curSeries  = 0;
+let curExIndex = 0;
+let phase      = 'work';
+let timeLeft   = 45;
+let timer      = null;
+let paused     = false;
+let startTime  = null;
+
 function startWorkout() {
-  // unlock audio on user gesture
   getACtx();
-
-  curSeries  = 0;
-  curExIndex = 0;
-  phase      = 'work';
-  timeLeft   = WORK_TIME;
-  paused     = false;
-  startTime  = Date.now();
-
-  document.getElementById('setup-screen').style.display = 'none';
-  document.getElementById('timer-screen').classList.add('active');
-
+  curSeries  = 0; curExIndex = 0; phase = 'work';
+  timeLeft   = currentFicha.workTime; paused = false; startTime = Date.now();
+  document.getElementById('timer-brand').innerHTML = esc(currentFicha.name).replace(' ', ' <span>') + '</span>';
+  showScreen('timer-screen');
   updateUI();
   runTick();
 }
 
-// ── TICKER ────────────────────────────────────────────────
-function runTick() {
-  clearInterval(timer);
-  timer = setInterval(tick, 1000);
-}
+function runTick() { clearInterval(timer); timer = setInterval(tick, 1000); }
 
 function tick() {
   if (paused) return;
-
-  // countdown beeps
   if (timeLeft <= 3 && timeLeft > 0) playCountdown(timeLeft);
-
   timeLeft--;
-
-  if (timeLeft < 0) {
-    advance();
-    return;
-  }
-
+  if (timeLeft < 0) { advance(); return; }
   updateRing();
   document.getElementById('ring-time').textContent = timeLeft;
 }
 
 function advance() {
+  const f = currentFicha;
   if (phase === 'work') {
-    playWorkEnd();
-    phase    = 'rest';
-    timeLeft = REST_TIME;
-    updateUI();
-    return;
+    playWorkEnd(); phase = 'rest'; timeLeft = f.restTime; updateUI(); return;
   }
-
-  // rest ended → next exercise
-  playRestEnd();
-  curExIndex++;
-
-  if (curExIndex >= EXERCISES.length) {
-    curExIndex = 0;
-    curSeries++;
-    if (curSeries >= totalSeries) {
-      // DONE
-      clearInterval(timer);
-      showDone();
-      return;
-    }
+  playRestEnd(); curExIndex++;
+  if (curExIndex >= f.exercises.length) {
+    curExIndex = 0; curSeries++;
+    if (curSeries >= totalSeries) { clearInterval(timer); showDone(); return; }
   }
-
-  phase    = 'work';
-  timeLeft = WORK_TIME;
-  updateUI();
+  phase = 'work'; timeLeft = f.workTime; updateUI();
 }
 
-function skipPhase() {
-  timeLeft = 0;
-  advance();
-}
+function skipPhase() { timeLeft = 0; advance(); }
 
 function togglePause() {
   paused = !paused;
-  const btn = document.getElementById('pause-btn');
-  btn.textContent = paused ? '▶ CONTINUAR' : '⏸ PAUSAR';
+  document.getElementById('pause-btn').textContent = paused ? '▶ CONTINUAR' : '⏸ PAUSAR';
 }
 
-function exitWorkout() {
-  clearInterval(timer);
-  document.getElementById('timer-screen').classList.remove('active');
-  document.getElementById('setup-screen').style.display = '';
-}
+function exitWorkout() { clearInterval(timer); showScreen('home-screen'); renderHome(); }
 
-// ── UI UPDATE ─────────────────────────────────────────────
 function updateUI() {
-  const ex     = EXERCISES[curExIndex];
+  const f      = currentFicha;
+  const ex     = f.exercises[curExIndex];
   const isWork = phase === 'work';
-  const total  = WORK_TIME;
 
-  // phase label
   const pLabel = document.getElementById('phase-label');
   pLabel.textContent = isWork ? 'TRABALHO' : 'DESCANSO';
-  pLabel.className   = 'phase-label' + (isWork ? '' : ' rest-mode');
+  pLabel.className = 'phase-label' + (isWork ? '' : ' rest-mode');
 
-  // ring color
   const ring = document.getElementById('ring');
   const ringGlow = document.getElementById('ring-glow');
   const ringColor = isWork ? 'var(--work)' : 'var(--rest)';
-  ring.style.stroke = ringColor;
-  ringGlow.style.stroke = ringColor;
+  ring.style.stroke = ringColor; ringGlow.style.stroke = ringColor;
 
-  // timer display
-  const t = isWork ? WORK_TIME : REST_TIME;
+  const t = isWork ? f.workTime : f.restTime;
   timeLeft = t;
   document.getElementById('ring-time').textContent = t;
-  document.getElementById('ring-sub').textContent  = isWork ? 'segundos' : 'descanso';
+  document.getElementById('ring-sub').textContent = isWork ? 'segundos' : 'descanso';
   updateRing();
 
-  // exercise card (only update during work)
   if (isWork) {
     document.getElementById('ex-card').className = 'exercise-card fade-in';
-    document.getElementById('ex-number').textContent = `EXERCÍCIO ${curExIndex+1} DE 10`;
+    document.getElementById('ex-number').textContent = `EXERCÍCIO ${curExIndex+1} DE ${f.exercises.length}`;
     document.getElementById('ex-name').textContent    = ex.name;
-    document.getElementById('ex-name-pt').textContent = ex.namePT;
-
+    document.getElementById('ex-name-pt').textContent = ex.namePT || '';
     const tagsEl = document.getElementById('ex-tags');
-    tagsEl.innerHTML = ex.muscles.map(m => `<span class="tag">${m}</span>`).join('');
-
-    document.getElementById('ex-tip').textContent = ex.tip;
-
+    tagsEl.innerHTML = (ex.muscles||[]).map(m => `<span class="tag">${esc(m)}</span>`).join('');
+    document.getElementById('ex-tip').textContent = ex.tip || '';
     const lvl = document.getElementById('level-badge');
-    const cls = ex.level === 'Avançado' ? 'avancado'
-              : ex.level === 'Intermediário' ? 'intermediario' : 'iniciante';
-    lvl.className   = `level-badge ${cls}`;
-    lvl.textContent = ex.level;
+    const cls = ex.level === 'Avançado' ? 'avancado' : ex.level === 'Intermediário' ? 'intermediario' : 'iniciante';
+    lvl.className = `level-badge ${cls}`; lvl.textContent = ex.level;
   } else {
     document.getElementById('ex-card').className = 'exercise-card rest-mode';
   }
 
-  // series
   document.getElementById('cur-series').textContent = curSeries + 1;
   document.getElementById('tot-series').textContent = totalSeries;
 
-  // next exercise
-  const nextIdx = (curExIndex + 1) % EXERCISES.length;
-  const isFinal = curExIndex === EXERCISES.length - 1 && curSeries === totalSeries - 1;
-
-  const nextEl = document.getElementById('next-preview');
+  const nextIdx = (curExIndex + 1) % f.exercises.length;
+  const isFinal = curExIndex === f.exercises.length - 1 && curSeries === totalSeries - 1;
+  const nextEl  = document.getElementById('next-preview');
   if (isFinal && !isWork) {
     nextEl.querySelector('.next-label').textContent = 'Último! 💪';
     document.getElementById('next-name').textContent = '';
   } else {
     nextEl.querySelector('.next-label').textContent = 'A seguir →';
-    document.getElementById('next-name').textContent = EXERCISES[nextIdx].name;
+    document.getElementById('next-name').textContent = f.exercises[nextIdx].name;
   }
 
-  // overall progress bar
-  const totalExercises = totalSeries * EXERCISES.length;
-  const doneExercises  = curSeries * EXERCISES.length + curExIndex;
-  const pct = (doneExercises / totalExercises) * 100;
-  document.getElementById('overall-bar').style.width   = pct + '%';
-  document.getElementById('overall-bar').style.background = isWork ? 'var(--work)' : 'var(--rest)';
+  const totalEx = totalSeries * f.exercises.length;
+  const doneEx  = curSeries * f.exercises.length + curExIndex;
+  const pct = (doneEx / totalEx) * 100;
+  const bar = document.getElementById('overall-bar');
+  bar.style.width = pct + '%';
+  bar.style.background = isWork ? 'var(--work)' : 'var(--rest)';
 }
 
 function updateRing() {
-  const total  = phase === 'work' ? WORK_TIME : REST_TIME;
-  const frac   = timeLeft / total;
+  const f = currentFicha;
+  const total = phase === 'work' ? f.workTime : f.restTime;
+  const frac  = timeLeft / total;
   const offset = CIRC * (1 - frac);
   document.getElementById('ring').style.strokeDashoffset = offset;
   document.getElementById('ring-glow').style.strokeDashoffset = offset;
   document.getElementById('ring-time').textContent = timeLeft;
 }
 
-// ── DONE ─────────────────────────────────────────────────
 function showDone() {
   playFinish();
+  const f = currentFicha;
   const elapsed = Math.round((Date.now() - startTime) / 60000);
-  document.getElementById('timer-screen').classList.remove('active');
-  const doneEl = document.getElementById('done-screen');
-  doneEl.classList.add('active');
   document.getElementById('stat-series').textContent = totalSeries;
-  document.getElementById('stat-time').textContent   = elapsed;
+  document.getElementById('stat-exercises').textContent = f.exercises.length;
+  document.getElementById('stat-time').textContent = elapsed;
   document.getElementById('done-sub').textContent =
-    `${totalSeries} série${totalSeries>1?'s':''} · ${EXERCISES.length * totalSeries * (WORK_TIME+REST_TIME) / 60 | 0} min de treino`;
+    `${totalSeries} série${totalSeries>1?'s':''} · ${f.name} · ${Math.round(totalSeries * f.exercises.length * (f.workTime + f.restTime) / 60)} min de treino`;
+  showScreen('done-screen');
 }
 
-function resetToSetup() {
-  document.getElementById('done-screen').classList.remove('active');
-  document.getElementById('setup-screen').style.display = '';
-  changeSeries(0); // refresh hint
+function returnHome() { showScreen('home-screen'); renderHome(); }
+
+// ── AUDIO ──────────────────────────────────────────────────
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let actx = null;
+function getACtx() { if (!actx) actx = new AudioCtx(); return actx; }
+
+function noise(dur, vol, t0) {
+  try {
+    const ctx = getACtx(); const bufSize = ctx.sampleRate * dur;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource(); src.buffer = buf;
+    const gain = ctx.createGain(); src.connect(gain); gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + dur);
+    src.start(ctx.currentTime + t0); src.stop(ctx.currentTime + t0 + dur + 0.02);
+  } catch(e) {}
 }
+
+function osc(freq, type, vol, attack, decay, t0, sweep) {
+  try {
+    const ctx = getACtx(); const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination); o.type = type;
+    o.frequency.setValueAtTime(freq, ctx.currentTime + t0);
+    if (sweep) o.frequency.exponentialRampToValueAtTime(sweep, ctx.currentTime + t0 + attack + decay);
+    g.gain.setValueAtTime(0.001, ctx.currentTime + t0);
+    g.gain.linearRampToValueAtTime(vol, ctx.currentTime + t0 + attack);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t0 + attack + decay);
+    o.start(ctx.currentTime + t0); o.stop(ctx.currentTime + t0 + attack + decay + 0.05);
+  } catch(e) {}
+}
+
+function playWorkEnd() {
+  osc(2200,'sine',0.55,0.02,0.18,0,2800); osc(2800,'sine',0.30,0.01,0.12,0.04,2200);
+  noise(0.22,0.06,0); osc(2500,'sine',0.45,0.01,0.13,0.30,3000); noise(0.15,0.05,0.30);
+}
+function playRestEnd() {
+  osc(180,'sine',0.7,0.005,0.18,0,60); osc(80,'sine',0.5,0.001,0.22,0,40);
+  osc(520,'square',0.18,0.005,0.06,0,null); osc(520,'square',0.18,0.005,0.06,0.08,null);
+  osc(520,'square',0.18,0.005,0.06,0.16,null); osc(300,'sawtooth',0.12,0.01,0.22,0,600);
+}
+function playCountdown(n) {
+  osc(1200,'square',0.22,0.002,0.04,0,800); osc(160,'sine',0.35,0.002,0.06,0,80); noise(0.04,0.12,0);
+}
+function playFinish() {
+  osc(100,'sine',0.6,0.005,0.25,0,50); noise(0.1,0.15,0);
+  [{f:392,t:.10},{f:494,t:.25},{f:587,t:.40},{f:740,t:.55},{f:988,t:.70}].forEach(({f,t}) => {
+    osc(f,'sine',0.45,0.01,0.35,t,null); osc(f*2,'sine',0.12,0.01,0.25,t,null); osc(f*3,'triangle',0.05,0.01,0.15,t,null);
+  });
+  osc(988,'sine',0.5,0.02,0.8,0.95,null); osc(494,'sine',0.2,0.02,0.8,0.95,null); noise(0.5,0.04,1.0);
+}
+
+// ── UTILS ──────────────────────────────────────────────────
+function esc(str) {
+  return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── INIT ───────────────────────────────────────────────────
+renderHome();
+renderFichasList();
 </script>
 </body>
 </html>
