@@ -769,6 +769,51 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
+
+  /* ── TOASTS ──────────────────────────────────────────── */
+  .toast-wrap {
+    position: fixed;
+    right: 14px;
+    bottom: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    z-index: 200;
+    pointer-events: none;
+    width: min(360px, calc(100vw - 24px));
+  }
+  .toast {
+    background: rgba(18,18,26,.96);
+    border: 1px solid rgba(255,255,255,.12);
+    border-left: 4px solid var(--muted);
+    border-radius: 10px;
+    padding: .7rem .85rem;
+    color: var(--text);
+    box-shadow: 0 10px 24px rgba(0,0,0,.35);
+    animation: toastIn .22s ease forwards;
+  }
+  .toast.success { border-left-color: var(--rest); }
+  .toast.error { border-left-color: var(--work); }
+  .toast.info { border-left-color: var(--accent); }
+  .toast-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: rgba(240,238,232,.7);
+    margin-bottom: .2rem;
+  }
+  .toast-msg { font-size: .84rem; line-height: 1.35; }
+  .toast.out { animation: toastOut .18s ease forwards; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateY(10px) scale(.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(8px) scale(.98); }
+  }
 </style>
 </head>
 <body>
@@ -879,9 +924,19 @@
             <input class="field-input" id="new-ex-sets" type="number" min="1" max="20" value="3">
           </div>
           <div>
+            <div class="field-label">Repetições por Série</div>
+            <input class="field-input" id="new-ex-reps" type="number" min="1" max="200" value="10">
+          </div>
+          <div>
             <div class="field-label">Descanso entre Séries (s)</div>
             <input class="field-input" id="new-ex-series-rest" type="number" min="0" max="300" value="30">
           </div>
+        </div>
+        <div>
+          <label style="display:flex;align-items:center;gap:.5rem;font-size:.85rem;color:var(--text);">
+            <input id="new-ex-warmup" type="checkbox">
+            Marcar como aquecimento
+          </label>
         </div>
         <div>
           <div class="field-label">Dica de Execução (opcional)</div>
@@ -1021,6 +1076,8 @@
   <button class="app-menu-btn" id="menu-setup-btn" data-menu-target="setup-screen" onclick="menuGoSetup()">Treino</button>
 </div>
 
+<div id="toast-wrap" class="toast-wrap" aria-live="polite" aria-atomic="false"></div>
+
 <script>
 // ── STORAGE ────────────────────────────────────────────────
 const STORAGE_KEY = 'treino_app_v1';
@@ -1047,22 +1104,7 @@ function saveData(data) {
 }
 
 function getDefaultFichas() {
-  return [{
-    id: 'default-kb',
-    name: 'KB Full Body',
-    exercises: [
-      { name: "Hand-to-Hand Swing",   namePT: "Swing de Mão em Mão",          muscles: ["Core","Glúteos","Post. Coxa","Grip"], tip: "Core contraído, quadril como motor",          level: "Avançado", mode: "tempo", workTime: 45, restTime: 20 },
-      { name: "Alternate Back Lunge", namePT: "Avanço Alternado para Trás",    muscles: ["Glúteos","Quadríceps","Equilíbrio"],  tip: "Joelho traseiro quase no chão",               level: "Intermediário", mode: "tempo", workTime: 45, restTime: 20 },
-      { name: "Strict Press R/L",     namePT: "Desenvolvimento Estrito D/E",   muscles: ["Deltoides","Tríceps","Core"],         tip: "Não arquear lombar, core ativo",              level: "Intermediário", mode: "serie", sets: 3, seriesRest: 40 },
-      { name: "Bent-Over Row R/L",    namePT: "Remada Curvada D/E",            muscles: ["Dorsais","Bíceps","Postura"],         tip: "Cotovelo puxando para trás, não para cima",   level: "Intermediário", mode: "serie", sets: 3, seriesRest: 40 },
-      { name: "Offset Push-Up R/L",   namePT: "Flexão com KB Alternado D/E",   muscles: ["Peito","Ombros","Core"],              tip: "Mão no KB, corpo alinhado",                  level: "Avançado", mode: "tempo", workTime: 45, restTime: 20 },
-      { name: "Goblet Squat",         namePT: "Agachamento Goblet",            muscles: ["Quadríceps","Glúteos","Core"],        tip: "Joelhos para fora, peito erguido",            level: "Iniciante", mode: "serie", sets: 4, seriesRest: 50 },
-      { name: "Single Leg RDL R/L",   namePT: "Levantamento Terra Unilateral", muscles: ["Isquiotibiais","Glúteos","Equilíbrio"],tip:"Quadril dobra, não a lombar",                level: "Intermediário", mode: "tempo", workTime: 40, restTime: 20 },
-      { name: "Swing Clean R/L",      namePT: "Swing com Limpeza D/E",         muscles: ["Potência","Grip","Full Body"],        tip: "Cotovelo guia o KB, não jogue",              level: "Avançado", mode: "tempo", workTime: 45, restTime: 20 },
-      { name: "Goblet Curl",          namePT: "Rosca Goblet",                  muscles: ["Bíceps","Grip","Core"],               tip: "Segurar KB pelos lados, cotovelos fixos",     level: "Iniciante", mode: "serie", sets: 3, seriesRest: 30 },
-      { name: "Crush Push-Ups",       namePT: "Flexão com Compressão",         muscles: ["Peito","Tríceps","Ombros"],           tip: "Apertar o KB o tempo todo para ativar",       level: "Intermediário", mode: "tempo", workTime: 40, restTime: 20 },
-    ]
-  }];
+  return [];
 }
 
 function getDefaultExerciseLibrary() {
@@ -1079,6 +1121,8 @@ function getDefaultExerciseLibrary() {
         workTime: ex.workTime,
         restTime: ex.restTime,
         sets: ex.sets,
+        reps: ex.reps,
+        isWarmup: !!ex.isWarmup,
         seriesRest: ex.seriesRest
       });
     });
@@ -1100,7 +1144,9 @@ function normalizeData(data) {
     ...getDefaultSettings(),
     ...(data?.settings || {})
   };
-  const fichas = Array.isArray(data?.fichas) ? data.fichas : [];
+  const fichas = Array.isArray(data?.fichas)
+    ? data.fichas.filter(f => f?.id !== 'default-kb')
+    : [];
   const history = Array.isArray(data?.workoutHistory) ? data.workoutHistory : [];
   const library = Array.isArray(data?.exerciseLibrary) ? data.exerciseLibrary : [];
   const normalizedFichas = fichas.map(f => {
@@ -1118,10 +1164,12 @@ function normalizeData(data) {
           muscles: Array.isArray(ex?.muscles) ? ex.muscles : [],
           tip: ex?.tip || '',
           level: ex?.level || 'Intermediário',
+          isWarmup: !!ex?.isWarmup,
           mode
         };
         if (mode === 'serie') {
           normalized.sets = Math.max(1, parseInt(ex?.sets, 10) || 3);
+          normalized.reps = Math.max(1, parseInt(ex?.reps, 10) || 10);
           normalized.seriesRest = Math.max(0, parseInt(ex?.seriesRest, 10) || 30);
         } else {
           normalized.workTime = Math.max(5, parseInt(ex?.workTime, 10) || defaultWork);
@@ -1140,10 +1188,12 @@ function normalizeData(data) {
       muscles: Array.isArray(item?.muscles) ? item.muscles : [],
       tip: item?.tip || '',
       level: item?.level || 'Intermediário',
+      isWarmup: !!item?.isWarmup,
       mode
     };
     if (mode === 'serie') {
       normalized.sets = Math.max(1, parseInt(item?.sets, 10) || 3);
+      normalized.reps = Math.max(1, parseInt(item?.reps, 10) || 10);
       normalized.seriesRest = Math.max(0, parseInt(item?.seriesRest, 10) || 30);
     } else {
       normalized.workTime = Math.max(5, parseInt(item?.workTime, 10) || 45);
@@ -1162,7 +1212,7 @@ function normalizeData(data) {
   normalizedLibrary.forEach(ex => autoLibrary.set(ex.name.toLowerCase(), ex));
 
   return {
-    activeFichaId: data?.activeFichaId || null,
+    activeFichaId: data?.activeFichaId === 'default-kb' ? null : (data?.activeFichaId || null),
     fichas: normalizedFichas,
     workoutHistory: history,
     exerciseLibrary: Array.from(autoLibrary.values()),
@@ -1227,8 +1277,9 @@ function updateAppMenu(screenId) {
 function getExerciseSummary(ex) {
   if (ex.mode === 'serie') {
     const sets = Math.max(1, parseInt(ex.sets, 10) || 1);
+    const reps = Math.max(1, parseInt(ex.reps, 10) || 10);
     const seriesRest = Math.max(0, parseInt(ex.seriesRest, 10) || 0);
-    return `${sets} série${sets > 1 ? 's' : ''} · ${seriesRest}s descanso`;
+    return `${sets} série${sets > 1 ? 's' : ''} x ${reps} rep · ${seriesRest}s descanso`;
   }
   const workTime = Math.max(5, parseInt(ex.workTime, 10) || 45);
   const restTime = Math.max(0, parseInt(ex.restTime, 10) || 20);
@@ -1281,6 +1332,19 @@ function getProgressStats() {
     totalMinutes,
     recentSessions: recent.length
   };
+}
+
+function toast(title, message, type = 'info', timeout = 2200) {
+  const wrap = document.getElementById('toast-wrap');
+  if (!wrap) return;
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<div class="toast-title">${esc(title)}</div><div class="toast-msg">${esc(message)}</div>`;
+  wrap.appendChild(el);
+  setTimeout(() => {
+    el.classList.add('out');
+    setTimeout(() => el.remove(), 200);
+  }, timeout);
 }
 
 function upsertLibraryFromExercises(exercises) {
@@ -1341,6 +1405,7 @@ function renderHistoryPanel() {
     <div class="history-head">
       <div class="history-title">Histórico Recente</div>
       <div class="history-stats">
+        ${(appData.workoutHistory || []).length > 0 ? '<button class="btn-ghost" onclick="clearWorkoutHistory()">Limpar histórico</button>' : ''}
         <span class="history-chip">${stats.totalSessions} sessões</span>
         <span class="history-chip">${stats.totalMinutes} min total</span>
         <span class="history-chip">${stats.recentSessions} últimas 7</span>
@@ -1349,6 +1414,18 @@ function renderHistoryPanel() {
     <div class="history-list">
       ${rows || '<div class="history-empty">Nenhum treino concluído ainda.</div>'}
     </div>`;
+}
+
+function clearWorkoutHistory() {
+  const historyCount = (appData.workoutHistory || []).length;
+  if (!historyCount) return;
+  if (!window.confirm(`Excluir ${historyCount} registro${historyCount > 1 ? 's' : ''} do histórico?`)) {
+    return;
+  }
+  appData.workoutHistory = [];
+  saveData(appData);
+  renderHistoryPanel();
+  toast('Histórico limpo', 'Todos os registros de treino foram removidos.', 'info');
 }
 
 // ── FICHAS LIST ────────────────────────────────────────────
@@ -1397,6 +1474,8 @@ function setActiveFicha(id) {
   saveData(appData);
   renderFichasList();
   renderHome();
+  const f = appData.fichas.find(item => item.id === id);
+  toast('Ficha ativa', `${f ? f.name : 'Treino'} selecionada para treino.`, 'success');
 }
 
 // ── EDITOR ─────────────────────────────────────────────────
@@ -1422,8 +1501,10 @@ function validateExerciseInput() {
   const mode = document.getElementById('new-ex-mode').value;
   if (mode === 'serie') {
     const sets = parseInt(document.getElementById('new-ex-sets').value, 10);
+    const reps = parseInt(document.getElementById('new-ex-reps').value, 10);
     const rest = parseInt(document.getElementById('new-ex-series-rest').value, 10);
     if (!Number.isFinite(sets) || sets < 1 || sets > 20) return 'Séries devem estar entre 1 e 20.';
+    if (!Number.isFinite(reps) || reps < 1 || reps > 200) return 'Repetições devem estar entre 1 e 200.';
     if (!Number.isFinite(rest) || rest < 0 || rest > 300) return 'Descanso entre séries deve estar entre 0 e 300 segundos.';
   } else {
     const work = parseInt(document.getElementById('new-ex-work-time').value, 10);
@@ -1460,7 +1541,9 @@ function applyLibraryExercise() {
   document.getElementById('new-ex-work-time').value = picked.workTime || 45;
   document.getElementById('new-ex-rest-time').value = picked.restTime || 20;
   document.getElementById('new-ex-sets').value = picked.sets || 3;
+  document.getElementById('new-ex-reps').value = picked.reps || 10;
   document.getElementById('new-ex-series-rest').value = picked.seriesRest || 30;
+  document.getElementById('new-ex-warmup').checked = !!picked.isWarmup;
   showEditorFeedback('Exercício carregado da biblioteca.', 'success');
 }
 
@@ -1504,6 +1587,7 @@ function renderEditorExercises() {
     const muscleTags = (ex.muscles||[]).map(m => `<span class="detail-chip">${esc(m)}</span>`).join('');
     const modeChip = ex.mode === 'serie' ? 'Por Série' : 'Por Tempo';
     const configChip = getExerciseSummary(ex);
+    const warmupChip = ex.isWarmup ? '<span class="detail-chip">Aquecimento</span>' : '';
     const upDisabled = i === 0 ? 'disabled' : '';
     const downDisabled = i === editorExercises.length - 1 ? 'disabled' : '';
     return `
@@ -1523,6 +1607,7 @@ function renderEditorExercises() {
         <div class="exercise-item-details">
           <span class="detail-chip">${modeChip}</span>
           <span class="detail-chip">${configChip}</span>
+          ${warmupChip}
           <span class="detail-chip ${lvlClass}">${esc(ex.level)}</span>
           ${muscleTags}
         </div>
@@ -1545,7 +1630,9 @@ function toggleAddForm() {
     document.getElementById('new-ex-work-time').value = '45';
     document.getElementById('new-ex-rest-time').value = '20';
     document.getElementById('new-ex-sets').value = '3';
+    document.getElementById('new-ex-reps').value = '10';
     document.getElementById('new-ex-series-rest').value = '30';
+    document.getElementById('new-ex-warmup').checked = false;
     handleModeChange();
     renderLibraryOptions();
     const submitBtn = document.getElementById('add-ex-submit-btn');
@@ -1587,9 +1674,11 @@ function addExerciseToEditor() {
   const level   = document.getElementById('new-ex-level').value;
   const muscles = document.getElementById('new-ex-muscles').value.split(',').map(s => s.trim()).filter(Boolean);
   const tip     = document.getElementById('new-ex-tip').value.trim();
-  const exercise = { name, namePT, level, muscles, tip, mode };
+  const isWarmup = document.getElementById('new-ex-warmup').checked;
+  const exercise = { name, namePT, level, muscles, tip, mode, isWarmup };
   if (mode === 'serie') {
     exercise.sets = Math.max(1, parseInt(document.getElementById('new-ex-sets').value, 10) || 3);
+    exercise.reps = Math.max(1, parseInt(document.getElementById('new-ex-reps').value, 10) || 10);
     exercise.seriesRest = Math.max(0, parseInt(document.getElementById('new-ex-series-rest').value, 10) || 30);
   } else {
     exercise.workTime = Math.max(5, parseInt(document.getElementById('new-ex-work-time').value, 10) || 45);
@@ -1598,9 +1687,11 @@ function addExerciseToEditor() {
   if (editorEditingIndex >= 0) {
     editorExercises[editorEditingIndex] = exercise;
     showEditorFeedback('Exercício atualizado com sucesso.', 'success');
+    toast('Exercício atualizado', `${name} foi atualizado na ficha.`, 'success');
   } else {
     editorExercises.push(exercise);
     showEditorFeedback('Exercício adicionado com sucesso.', 'success');
+    toast('Exercício adicionado', `${name} foi adicionado à ficha.`, 'success');
   }
   upsertLibraryFromExercises([exercise]);
   renderEditorExercises();
@@ -1629,7 +1720,9 @@ function editExercise(i) {
   document.getElementById('new-ex-work-time').value = ex.workTime || 45;
   document.getElementById('new-ex-rest-time').value = ex.restTime || 20;
   document.getElementById('new-ex-sets').value = ex.sets || 3;
+  document.getElementById('new-ex-reps').value = ex.reps || 10;
   document.getElementById('new-ex-series-rest').value = ex.seriesRest || 30;
+  document.getElementById('new-ex-warmup').checked = !!ex.isWarmup;
   handleModeChange();
   document.getElementById('add-ex-submit-btn').textContent = 'Salvar Alterações';
   showEditorFeedback(`Editando: ${ex.name}`, 'success');
@@ -1703,6 +1796,7 @@ function saveFicha() {
   renderFichasList();
   renderHome();
   showScreen('fichas-screen');
+  toast('Ficha salva', `${name} foi salva com sucesso.`, 'success');
 }
 
 // ── DELETE MODAL ───────────────────────────────────────────
@@ -1721,12 +1815,14 @@ function closeDeleteModal() {
 }
 function confirmDelete() {
   if (!pendingDeleteId) return;
+  const deletedFicha = appData.fichas.find(f => f.id === pendingDeleteId);
   appData.fichas = appData.fichas.filter(f => f.id !== pendingDeleteId);
   if (appData.activeFichaId === pendingDeleteId) appData.activeFichaId = null;
   saveData(appData);
   renderFichasList();
   renderHome();
   closeDeleteModal();
+  toast('Ficha excluída', `${deletedFicha ? deletedFicha.name : 'A ficha'} foi removida.`, 'info');
 }
 
 // ── SETUP ──────────────────────────────────────────────────
@@ -1925,6 +2021,7 @@ function updateUI() {
     const baseTags = (ex.muscles||[]).map(m => `<span class="tag">${esc(m)}</span>`);
     baseTags.unshift(`<span class="tag">${ex.mode === 'serie' ? 'POR SÉRIE' : 'POR TEMPO'}</span>`);
     baseTags.unshift(`<span class="tag">${esc(getExerciseSummary(ex))}</span>`);
+    if (ex.isWarmup) baseTags.unshift('<span class="tag">AQUECIMENTO</span>');
     tagsEl.innerHTML = baseTags.join('');
     document.getElementById('ex-tip').textContent = ex.tip || '';
     const lvl = document.getElementById('level-badge');
